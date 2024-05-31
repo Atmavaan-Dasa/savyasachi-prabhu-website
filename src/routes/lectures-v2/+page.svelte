@@ -134,11 +134,11 @@
 		localStorage.setItem(`heards`, JSON.stringify(heards));
 	}
 
-	function updateSearchTerm(e) {
+	function updateSearchTerm(e: any) {
 		searchTerm = e.target.value.toLowerCase();
 	}
 
-	function updateSortOption(e) {
+	function updateSortOption(e: any) {
 		sortOption = e.target.value;
 	}
 

@@ -3,8 +3,7 @@
 
 	onMount(() => {
 		// Replace 'https://example.com' with the URL you want to redirect to
-		window.location.href =
-			'https://savyasachidas.neocities.org/TEST%20SS%20Pr_Btn-Lnk-Rmvd___code%20inserted.html';
+		window.location.href = 'https://savyasachidas.neocities.org/audio';
 	});
 </script>
 
