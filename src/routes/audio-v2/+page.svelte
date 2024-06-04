@@ -59,6 +59,7 @@
 	let playbackRate = 1;
 	let isPlaying = false;
 	let currentTime = 0;
+	let currentTitle = '';
 	let duration = 0;
 	let isLoading = false;
 	$: lastPlayedPosition = 0;
@@ -167,6 +168,7 @@
 		const currentData = filteredData.length ? filteredData : data;
 		if (!audio.paused || !audio.src) {
 			audio.src = currentData[index].audioLink;
+			currentTitle = currentData[index].title;
 			console.log(audio.src);
 		}
 
@@ -335,7 +337,7 @@
 		<div class="flex items-center space-x-4">
 			<div class="min-w-0 flex-auto space-y-1 font-semibold">
 				<p class="text-lg text-slate-900 dark:text-slate-50">
-					<span>{filteredData[currentIndex]?.title}</span>
+					<span>{currentTitle}</span>
 				</p>
 			</div>
 		</div>
