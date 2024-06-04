@@ -21,7 +21,7 @@
 	});
 </script>
 
-<nav class="relative bg-[#FAEEF4] shadow">
+<nav class="sticky top-0 z-[100] bg-[#FAEEF4] shadow">
 	<div class="container mx-auto px-6 py-4 md:flex md:items-center md:justify-between">
 		<div class="flex items-center justify-between">
 			<a href="/" class="text-2xl font-bold"> H.G. Savyasaci Prabhu </a>

@@ -4,6 +4,8 @@
 	import Header from '../lib/Header.svelte';
 </script>
 
-<Header />
-<slot />
-<Footer />
+<div class="relative">
+	<Header />
+	<slot />
+	<Footer />
+</div>
