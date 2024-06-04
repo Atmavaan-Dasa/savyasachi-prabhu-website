@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 </script> -->
 
-<section class="bg-purple-100">
+<section class="bg-white">
 	<div class="container mx-auto flex min-h-[800px] items-center px-6 py-12">
 		<div class="mx-auto flex max-w-sm flex-col items-center text-center">
 			<p class="rounded-full bg-purple-50 p-3 text-sm font-medium text-purple-500">
@@ -22,9 +22,7 @@
 				</svg>
 			</p>
 			<h1 class="mt-3 text-2xl font-semibold text-gray-800 md:text-3xl">Page not found</h1>
-			<p class="mt-4 text-gray-500">
-				The page you are looking for doesn't exist. Here are some helpful links:
-			</p>
+			<p class="mt-4 text-gray-500">The page you are looking for doesn't exist</p>
 
 			<div class="mt-6 flex w-full shrink-0 items-center gap-x-3 sm:w-auto">
 				<a

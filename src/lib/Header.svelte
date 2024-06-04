@@ -69,7 +69,7 @@
 					>
 					<a
 						class="my-2 transform text-[#322037] transition-colors duration-300 md:mx-4 md:my-0"
-						href="/lectures">Lectures</a
+						href="/audio">Lectures</a
 					>
 					<a
 						class="my-2 transform text-[#322037] transition-colors duration-300 md:mx-4 md:my-0"
@@ -107,7 +107,7 @@
 				>
 				<a
 					class="my-2 transform text-[#322037] transition-colors duration-300 md:mx-4 md:my-0"
-					href="/lectures">Lectures</a
+					href="/audio">Lectures</a
 				>
 				<a
 					class="my-2 transform text-[#322037] transition-colors duration-300 md:mx-4 md:my-0"

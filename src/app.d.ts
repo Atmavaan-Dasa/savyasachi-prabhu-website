@@ -17,7 +17,6 @@ declare module '*?lqip' {
 		height: number;
 		src: string;
 	};
-	export default lqip;
 }
 
-export {};
+export { lqip };

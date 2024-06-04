@@ -68,7 +68,7 @@
 					<div class="text-pink-50">
 						<h3 class="text-lg uppercase text-pink-100">Link</h3>
 						<a href="/" class="mt-2 block">Home</a>
-						<a href="/lectures" class="t mt-2 block">Lectures</a>
+						<a href="/audio" class="t mt-2 block">Lectures</a>
 						<a href="/" class="mt-2 block">Contact</a>
 					</div>
 					<!-- 

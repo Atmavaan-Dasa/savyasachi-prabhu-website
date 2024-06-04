@@ -53,14 +53,30 @@
 	}
 
 	let itemSize = 80;
+	let audio: HTMLAudioElement;
+	let currentIndex = 0;
+	let playbackRate = 1;
+	let isPlaying = false;
+	let currentTime = 0;
+	let duration = 0;
+	let isLoading = false;
+	$: lastPlayedPosition = 0;
 
 	onMount(() => {
 		fetchData();
 		const savedHeards = localStorage.getItem('heards');
 		if (savedHeards) {
-			// Check if the value is not null
 			heards = JSON.parse(savedHeards);
 		}
+		audio = new Audio();
+		audio.addEventListener('timeupdate', () => {
+			currentTime = audio.currentTime;
+		});
+		audio.addEventListener('loadedmetadata', () => {
+			duration = audio.duration;
+			isLoading = false;
+		});
+		audio.addEventListener('ended', nextAudio);
 	});
 
 	$: searchTerm = '';
@@ -145,6 +161,69 @@
 	function toggleSortOrder() {
 		sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
 	}
+
+	function playAudio(index: number) {
+		const currentData = filteredData.length ? filteredData : data;
+		if (!audio.paused || !audio.src) {
+			audio.src = currentData[index].audioLink;
+			console.log(audio.src);
+		}
+
+		if (!isPlaying && audio.currentTime > 0 && audio.paused) {
+			audio.currentTime = lastPlayedPosition;
+			audio.play();
+			isPlaying = true;
+		} else {
+			audio.play();
+			isPlaying = true;
+			isLoading = true;
+		}
+	}
+
+	function pauseAudio() {
+		audio.pause();
+		isPlaying = false;
+		lastPlayedPosition = audio.currentTime;
+	}
+
+	function togglePlayPause() {
+		if (isPlaying) {
+			pauseAudio();
+		} else {
+			playAudio(currentIndex);
+		}
+	}
+
+	function nextAudio() {
+		const currentData = filteredData.length ? filteredData : data;
+		currentIndex = (currentIndex + 1) % currentData.length;
+
+		playAudio(currentIndex);
+	}
+
+	function previousAudio() {
+		const currentData = filteredData.length ? filteredData : data;
+		currentIndex = (currentIndex - 1 + currentData.length) % currentData.length;
+
+		playAudio(currentIndex);
+	}
+
+	function changePlaybackRate(rate: number) {
+		audio.playbackRate = rate;
+		playbackRate = rate;
+	}
+
+	function seekAudio(seconds: number) {
+		audio.currentTime += seconds;
+	}
+
+	function jumpToTimestamp(e: any) {
+		audio.currentTime = e.target.value;
+	}
+
+	function updateCurrentTime(e: any) {
+		audio.currentTime = e.target.value;
+	}
 </script>
 
 <div class="input-wrap">
@@ -166,7 +245,17 @@
 {#if data.length > 0}
 	<div class="list">
 		<VirtualList height={800} width="auto" itemCount={filteredData.length} {itemSize}>
-			<div slot="item" let:index let:style {style} class="row">
+			<div
+				slot="item"
+				let:index
+				let:style
+				{style}
+				class="row"
+				on:click={() => {
+					currentIndex = index;
+					playAudio(index);
+				}}
+			>
 				<td>{filteredData[index].title}</td>
 				<td class="ml-5">
 					{#if heards[filteredData[index].Id]}
@@ -222,7 +311,56 @@
 	<p>Loading data...</p>
 {/if}
 
+<div class="audio-controls">
+	<button on:click={previousAudio}>Previous</button>
+	<button on:click={togglePlayPause}>{isPlaying ? 'Pause' : 'Play'}</button>
+	<button on:click={nextAudio}>Next</button>
+	<button on:click={() => seekAudio(-10)}>-10s</button>
+	<button on:click={() => seekAudio(10)}>+10s</button>
+	<input type="number" min="0" on:change={jumpToTimestamp} placeholder="Jump to (s)" />
+	<select on:change={(e) => changePlaybackRate(parseFloat(e.target.value))}>
+		<option value="0.5">0.5x</option>
+		<option value="0.75">0.75x</option>
+		<option value="1" selected>1x</option>
+		<option value="1.25">1.25x</option>
+		<option value="1.5">1.5x</option>
+		<option value="2">2x</option>
+	</select>
+</div>
+
+<div class="seekbar">
+	<input type="range" min="0" max={duration} value={currentTime} on:input={updateCurrentTime} />
+	<span>{isLoading ? 'Loading...' : filteredData[currentIndex]?.title}</span>
+</div>
+
 <style>
+	.audio-controls,
+	.seekbar {
+		margin-top: 20px;
+		display: flex;
+		gap: 10px;
+		align-items: center;
+	}
+	.input-wrap,
+	.sort-options,
+	.list {
+		margin-bottom: 20px;
+	}
+	.row {
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+	}
+	.ml-5 {
+		margin-left: 20px;
+	}
+	.text-green-500 {
+		color: green;
+	}
+	.text-red-500 {
+		color: red;
+	}
+
 	:global(body),
 	:global(html) {
 		height: 100%;
@@ -268,9 +406,6 @@
 		font-weight: 500;
 		background: #fff;
 		padding-left: 20px;
-		display: flex;
-		align-items: center;
-		flex-wrap: wrap;
 	}
 	input[type='text'] {
 		height: 30px;
