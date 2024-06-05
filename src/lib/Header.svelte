@@ -69,6 +69,7 @@
 					>
 					<a
 						class="my-2 transform text-[#322037] transition-colors duration-300 md:mx-4 md:my-0"
+						target="_blank"
 						href="/audio">Lectures</a
 					>
 					<a
@@ -107,6 +108,7 @@
 				>
 				<a
 					class="my-2 transform text-[#322037] transition-colors duration-300 md:mx-4 md:my-0"
+					target="_blank"
 					href="/audio">Lectures</a
 				>
 				<a
@@ -117,7 +119,3 @@
 		</div>
 	</div>
 </nav>
-
-<style>
-	/* Add your CSS here if needed */
-</style>
