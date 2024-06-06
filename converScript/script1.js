@@ -91,7 +91,7 @@ function processHTMLFile(inputFilePath, outputFilePath) {
 }
 
 // Example usage
-const inputFilePath = 'index.html'; // Path to the input HTML file
+const inputFilePath = 'index1.html'; // Path to the input HTML file
 const outputFilePath = 'output.json'; // Path to the output JSON file
 
 processHTMLFile(inputFilePath, outputFilePath);

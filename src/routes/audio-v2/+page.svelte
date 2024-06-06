@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import VirtualList from 'svelte-tiny-virtual-list';
 	export let data: any;
-	data = data.data;
+	data = data.data
 	let sortOption = 'date'; // Default sort option
 	let sortOrder = 'asc'; // Default sort order (ascending)
 
