@@ -26,6 +26,7 @@
 					style="background-image: url('{lqip.lqip}'); background-size: cover;"
 					alt="Lecture"
 					class="rounded transition duration-700 hover:scale-125"
+					loading="lazy"
 				/>
 			</div>
 		{/each}

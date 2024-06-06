@@ -1,10 +1,32 @@
+<script>
+// @ts-nocheck
+
+
+	import foot from '$lib/pics/logo.webp?w=500;700;900;1200&as=srcset'
+	import lqip from '$lib/pics/logo.webp?lqip';
+	
+</script>
+
+
 <footer class="bg-[#352339]">
 	<div class="container mx-auto p-6">
 		<div class="lg:flex">
 			<div class="-mx-6 w-full lg:w-2/5">
 				<div class="px-6">
-					<a href="/">
-						<img class="h-[6rem] w-auto" src="/logo.png" alt="" />
+					<a href="/" >
+					
+						<picture >
+							<source srcset={foot} type="image/webp" />
+							<img
+								src={lqip.src}
+								width={lqip.width}
+								height={lqip.height}
+								style="background-image: url('{lqip.lqip}'); background-size: cover;"
+								class="h-[6rem] w-auto"
+								loading="lazy"
+								alt=""
+							/>
+						</picture>
 					</a>
 					<hr class="my-6 mr-20 h-px border-none bg-gray-200 dark:bg-gray-700" />
 
