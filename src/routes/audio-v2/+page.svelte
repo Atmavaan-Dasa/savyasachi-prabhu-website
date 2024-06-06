@@ -2,8 +2,9 @@
 	// @ts-nocheck
 	import { onMount } from 'svelte';
 	import VirtualList from 'svelte-tiny-virtual-list';
-	export let data: any;
-	data = data.data
+	export let data;
+	//data = data.data
+	let data1:any=[]
 	let sortOption = 'date'; // Default sort option
 	let sortOrder = 'asc'; // Default sort order (ascending)
 
@@ -40,6 +41,8 @@
 				imports[id] = heard === 'heard';
 			});
 
+		
+
 			heards = imports;
 			localStorage.setItem('heards', JSON.stringify(heards));
 		};
@@ -64,6 +67,7 @@
 		if (savedHeards) {
 			heards = JSON.parse(savedHeards);
 		}
+		data1=data.data
 		audio = new Audio();
 		audio.addEventListener('timeupdate', () => {
 			currentTime = audio.currentTime;
@@ -77,7 +81,7 @@
 
 	$: searchTerm = '';
 
-	$: filteredData = data
+	$: filteredData = data1
 		.filter((item: any) => {
 			const term = searchTerm.trim().replace(/\s+/g, ' ').toLowerCase().split(' ').filter(Boolean);
 
@@ -159,7 +163,7 @@
 	}
 
 	function playAudio(index: number) {
-		const currentData = filteredData.length ? filteredData : data;
+		const currentData = filteredData.length ? filteredData : data1;
 		if (!audio.paused || !audio.src) {
 			audio.src = currentData[index].audioLink;
 			currentTitle = currentData[index].title;
@@ -192,14 +196,14 @@
 	}
 
 	function nextAudio() {
-		const currentData = filteredData.length ? filteredData : data;
+		const currentData = filteredData.length ? filteredData : data1;
 		currentIndex = (currentIndex + 1) % currentData.length;
 
 		playAudio(currentIndex);
 	}
 
 	function previousAudio() {
-		const currentData = filteredData.length ? filteredData : data;
+		const currentData = filteredData.length ? filteredData : data1;
 		currentIndex = (currentIndex - 1 + currentData.length) % currentData.length;
 
 		playAudio(currentIndex);
@@ -239,7 +243,7 @@
 	</button>
 </div>
 
-{#if data.length > 0}
+{#if data1.length > 0}
 	<div class="list">
 		<VirtualList height={500} width="auto" itemCount={filteredData.length} {itemSize}>
 			<div
