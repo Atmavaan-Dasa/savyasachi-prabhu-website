@@ -1,7 +1,9 @@
 /** @type {import('./$types').PageLoad} */
 export async function load() {
-	const response = await fetch('https://savyasachidas.com/output.json');
-	const jsonData = await response.json();
+	
+    const response = await fetch('https://savyasachidas.com/output.json');
+	
+    const jsonData = await response.json();
 
 	return {
 		data: jsonData
