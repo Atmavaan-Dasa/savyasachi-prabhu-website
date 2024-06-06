@@ -242,25 +242,22 @@
 {#if data.length > 0}
 	<div class="list">
 		<VirtualList height={500} width="auto" itemCount={filteredData.length} {itemSize}>
-			<button
+			<div
 				slot="item"
 				let:index
 				let:style
 				{style}
 				class="row"
-				on:click={() => {
-					currentIndex = index;
-					playAudio(index);
-				}}
+				
 			>
-				<td class="">
+				<div class="">
 					{#if heards[filteredData[index].Id]}
 						<button class="text-green-500" on:click={() => toggleHeard(index)}>Heard</button>
 					{:else}
 						<button class="text-red-500" on:click={() => toggleHeard(index)}>Unheard</button>
 					{/if}
-				</td>
-				<td class="ml-5">
+				</div>
+				<div class="ml-5">
 					{#if filteredData[index].loading}
 						<svg
 							class="h-8 w-8 animate-spin"
@@ -298,9 +295,12 @@
 							Download
 						</button>
 					{/if}
-				</td>
-				<td class=" whitespace-nowrap">{filteredData[index].title}</td>
-			</button>
+					</div>
+				<button class=" whitespace-nowrap" on:click={() => {
+					currentIndex = index;
+					playAudio(index);
+				}}>{filteredData[index].title}</button>
+				</div>
 		</VirtualList>
 
 		<button on:click={exportHeardData}>Export Heard Data</button>
