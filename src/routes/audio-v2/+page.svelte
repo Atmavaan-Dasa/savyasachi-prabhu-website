@@ -2,7 +2,8 @@
 	// @ts-nocheck
 	import { onMount } from 'svelte';
 	import VirtualList from 'svelte-tiny-virtual-list';
-	let data: any = [];
+	export let data: any;
+	data = data.data;
 	let sortOption = 'date'; // Default sort option
 	let sortOrder = 'asc'; // Default sort order (ascending)
 
@@ -47,12 +48,6 @@
 		document.body.removeChild(input);
 	}
 
-	async function fetchData() {
-		const response = await fetch('/output.json');
-		const jsonData = await response.json();
-		data = jsonData;
-	}
-
 	let itemSize = 80;
 	let audio: HTMLAudioElement;
 	let currentIndex = 0;
@@ -65,7 +60,6 @@
 	$: lastPlayedPosition = 0;
 
 	onMount(() => {
-		fetchData();
 		const savedHeards = localStorage.getItem('heards');
 		if (savedHeards) {
 			heards = JSON.parse(savedHeards);
@@ -233,7 +227,7 @@
 	<input type="text" placeholder="Search items..." on:keyup={updateSearchTerm} />
 </div>
 
-<div class="sort-options">
+<div class="sort-options ml-6">
 	<select on:change={updateSortOption}>
 		<option value="date">Date</option>
 		<option value="duration">Duration</option>
@@ -259,7 +253,7 @@
 					playAudio(index);
 				}}
 			>
-				<td class="ml-5">
+				<td class="">
 					{#if heards[filteredData[index].Id]}
 						<button class="text-green-500" on:click={() => toggleHeard(index)}>Heard</button>
 					{:else}
@@ -330,13 +324,13 @@
 	<input type="number" min="0" on:change={jumpToTimestamp} placeholder="Jump to (s)" />
 </div> -->
 
-<div class="w-full">
+<div class="fixed bottom-0 left-0 right-0 w-full">
 	<div
 		class="items-center space-y-2 rounded-t-xl border-b border-slate-100 bg-white p-2 pb-3 dark:border-slate-500 dark:bg-slate-800 sm:space-y-8 sm:p-10 sm:pb-8 lg:space-y-6 lg:p-6"
 	>
 		<div class="flex items-center space-x-4">
 			<div class="min-w-0 flex-auto space-y-1 font-semibold">
-				<p class="text-lg text-slate-900 dark:text-slate-50">
+				<p class="overflow-x-auto whitespace-nowrap text-lg text-slate-900">
 					<span>{currentTitle}</span>
 				</p>
 			</div>
@@ -392,7 +386,7 @@
 			</button> -->
 			<button
 				type="button"
-				class="hidden sm:block lg:hidden xl:block"
+				class=" sm:block xl:block"
 				on:click={previousAudio}
 				aria-label="Previous"
 			>
@@ -478,12 +472,7 @@
 					/>
 				</svg>
 			</button>
-			<button
-				type="button"
-				class="hidden sm:block lg:hidden xl:block"
-				on:click={nextAudio}
-				aria-label="Next"
-			>
+			<button type="button" class="sm:block xl:block" on:click={nextAudio} aria-label="Next">
 				<svg width="24" height="24" fill="none">
 					<path
 						d="M14 12 6 6v12l8-6Z"
@@ -555,13 +544,13 @@
 	:global(.virtual-list-wrapper) {
 		margin: 20px;
 		background: #fff;
-		border-top: 1px solid black;
-		border-radius: 10px;
-		box-shadow:
+		/* border-top: 1px solid black; */
+		border-radius: 5px;
+		/* box-shadow:
 			0 2px 2px 0 rgba(0, 0, 0, 0.14),
 			0 3px 1px -2px rgba(0, 0, 0, 0.2),
 			0 1px 5px 0 rgba(0, 0, 0, 0.12);
-		background: #fafafa;
+		background: #fafafa; */
 		font-family: -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
 		color: #333;
 		-webkit-font-smoothing: antialiased;
