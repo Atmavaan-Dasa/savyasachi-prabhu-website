@@ -38,7 +38,7 @@
 					title="YouTube video player"
 					frameborder="0"
 					allowfullscreen
-					loading="lazy"
+				
 				></iframe>
 			</div>
 		{/each}
