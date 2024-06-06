@@ -29,7 +29,7 @@
 					href="/"
 					class="w-1/2 shrink-0 rounded-lg bg-purple-500 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 hover:bg-purple-600 sm:w-auto"
 				>
-					Take me home
+					Home
 				</a>
 			</div>
 		</div>
