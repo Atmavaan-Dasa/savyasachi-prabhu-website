@@ -13,10 +13,10 @@
 
 <main class="flex min-h-[60%] flex-col items-center bg-[#f7f3f7] pb-10">
 	<header class="mb-4 mt-8 py-5 text-center">
-		<h1 class="text-lg">DIVINITY IN HIS SMILE</h1>
+		<h1 class="">DIVINITY IN HIS SMILE</h1>
 		<h2 class="text-4xl font-bold">H.G. Savyasachi Prabhu Ji in Lectures</h2>
 	</header>
-	<section class="grid max-w-7xl grid-cols-1 gap-10 p-10 sm:grid-cols-2 lg:grid-cols-3">
+	<section class="grid max-w-7xl grid-cols-1 gap-10 p-3 sm:grid-cols-2 md:p-10 lg:grid-cols-3">
 		{#each lectures as lqip}
 			<div class="inline-block h-[200px] w-[350px] overflow-hidden rounded-md bg-white shadow">
 				<img

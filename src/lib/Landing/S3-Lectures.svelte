@@ -29,17 +29,19 @@
 					</div>
 				{/if}
 
-				<iframe
-					width="400"
-					height="250"
-					on:load={() => handleLoaded(index)}
-					src={videoLink}
-					class="rounded-md"
-					title="YouTube video player"
-					frameborder="0"
-					allowfullscreen
-				
-				></iframe>
+				<div>
+					<iframe
+						width="350"
+						height="250"
+						loading="lazy"
+						on:load={() => handleLoaded(index)}
+						src={videoLink}
+						class="rounded-md"
+						title="YouTube video player"
+						frameborder="0"
+						allowfullscreen
+					></iframe>
+				</div>
 			</div>
 		{/each}
 	</section>
