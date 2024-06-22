@@ -2,8 +2,10 @@
 	// @ts-nocheck
 	import { onMount } from 'svelte';
 	import VirtualList from 'svelte-tiny-virtual-list';
+	import HeaderAudio from '$lib/Header-audio.svelte';
 	export let data;
 	data = data.data;
+
 	// let data1: any = [];
 	let sortOption = 'date'; // Default sort option
 	let sortOrder = 'asc'; // Default sort order (ascending)
@@ -225,20 +227,27 @@
 	}
 </script>
 
-<div class="input-wrap">
-	<input type="text" placeholder="Search items..." on:keyup={updateSearchTerm} />
+<HeaderAudio />
+
+<div class="flex w-full flex-1">
+	<input type="text" class="  pl-4" placeholder="Search items..." on:keyup={updateSearchTerm} />
 </div>
 
-<div class="sort-options ml-6">
-	<select on:change={updateSortOption}>
-		<option value="date">Date</option>
-		<option value="duration">Duration</option>
-		<option value="heard">Heard</option>
-		<option value="scripture">Scripture</option>
-	</select>
+<div class="mx-4">
+	<div class="flex">
+		<div class="">Sort :</div>
+		<select on:change={updateSortOption}>
+			<option value="date">Date</option>
+			<option value="duration">Duration</option>
+			<option value="heard">Heard</option>
+			<option value="scripture">Scripture</option>
+		</select>
+	</div>
 	<button on:click={toggleSortOrder}>
-		{sortOrder === 'asc' ? 'Sort Descending' : 'Sort Ascending'}
+		{sortOrder === 'asc' ? 'Ascending' : 'Descenting'}
 	</button>
+	<button on:click={exportHeardData} class=" rounded-lg border bg-slate-100">Export</button>
+	<button on:click={importHeardData} class="">Import</button>
 </div>
 
 {#if data.length > 0}
@@ -300,9 +309,6 @@
 				>
 			</div>
 		</VirtualList>
-
-		<button on:click={exportHeardData}>Export Heard Data</button>
-		<button on:click={importHeardData}>Import Heard Data</button>
 	</div>
 {:else}
 	<div
@@ -322,7 +328,7 @@
 	<input type="number" min="0" on:change={jumpToTimestamp} placeholder="Jump to (s)" />
 </div> -->
 
-<div class="fixed bottom-0 left-0 right-0 w-full">
+<div class="fixed bottom-2 left-0 right-0 w-full">
 	<div
 		class="items-center space-y-2 rounded-t-xl border-b border-slate-100 bg-white p-2 pb-3 dark:border-slate-500 dark:bg-slate-800 sm:space-y-8 sm:p-10 sm:pb-8 lg:space-y-6 lg:p-6"
 	>
@@ -366,9 +372,7 @@
 			</div>
 		</div>
 	</div>
-	<div
-		class="flex items-center rounded-b-xl bg-slate-50 text-slate-500 dark:bg-slate-600 dark:text-slate-200"
-	>
+	<div class="flex items-center rounded-b-xl bg-slate-50 text-slate-500">
 		<div class="flex flex-auto items-center justify-evenly">
 			<!-- <button type="button" aria-label="Add to favorites">
 				<svg width="24" height="24">
@@ -447,7 +451,18 @@
 					<rect x="20" y="4" width="4" height="24" rx="2" />
 				</svg>
 			{:else}
-				Play
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="currentColor"
+					class="size-6"
+				>
+					<path
+						fill-rule="evenodd"
+						d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z"
+						clip-rule="evenodd"
+					/>
+				</svg>
 			{/if}
 		</button>
 		<!-- <button >+10s</button> -->
@@ -491,7 +506,7 @@
 			</button>
 
 			<select
-				class="text-md rounded-lg bg-purple-100 px-2 py-1 font-semibold leading-6 text-purple-400 ring-2 ring-inset ring-purple-200"
+				class="text-md rounded-lg bg-blue-50 px-2 py-1 font-semibold leading-6 text-blue-400 ring-2 ring-inset ring-blue-200"
 				on:change={(e) => changePlaybackRate(parseFloat(e.target.value))}
 			>
 				<option value="0.5">0.5x</option>
@@ -512,8 +527,7 @@
 		gap: 10px;
 		align-items: center;
 	}
-	.input-wrap,
-	.sort-options,
+
 	.list {
 		margin-bottom: 20px;
 	}
@@ -554,11 +568,6 @@
 		-webkit-font-smoothing: antialiased;
 	}
 
-	.input-wrap {
-		display: flex;
-		flex-grow: 1;
-	}
-
 	.row {
 		/* padding: 0 15px; */
 
@@ -570,11 +579,11 @@
 		padding-left: 20px;
 	}
 	input[type='text'] {
-		height: 30px;
+		height: 50px;
 		/* max-width: 1900px; */
 		width: 100%;
-		padding: 5px;
-		margin: 20px;
+		/* padding: 5px;
+		margin: 20px; */
 		border: 1px solid #ccc;
 		border-radius: 5px;
 	}
