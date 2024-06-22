@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import VirtualList from 'svelte-tiny-virtual-list';
 	import HeaderAudio from '$lib/Header-audio.svelte';
+	import { Share2Icon, Download } from 'lucide-svelte';
 	export let data;
 	data = data.data;
 
@@ -11,6 +12,10 @@
 	let sortOrder = 'asc'; // Default sort order (ascending)
 
 	$: heards = {} as any;
+
+	let downloadProgress = 0;
+	let totalSize = 0;
+	let downloadedSize = 0;
 
 	function exportHeardData() {
 		const data = Object.entries(heards)
@@ -121,10 +126,49 @@
 			return 0;
 		});
 
-	async function downloadFile(url: any, filename: any) {
+	// async function downloadFile(url: any, filename: any) {
+	// 	try {
+	// 		const response = await fetch(url);
+	// 		const blob = await response.blob();
+	// 		const objectUrl = window.URL.createObjectURL(blob);
+	// 		const link = document.createElement('a');
+	// 		link.href = objectUrl;
+	// 		link.download = filename;
+	// 		document.body.appendChild(link);
+	// 		link.click();
+	// 		document.body.removeChild(link);
+	// 		window.URL.revokeObjectURL(objectUrl);
+	// 	} catch (error) {
+	// 		console.error('Download failed:', error);
+	// 	}
+	// }
+
+	async function downloadFile(url: string, filename: string) {
 		try {
 			const response = await fetch(url);
-			const blob = await response.blob();
+			if (!response.ok) throw new Error('Download failed');
+
+			const contentLength = response.headers.get('content-length');
+			totalSize = contentLength ? parseInt(contentLength, 10) : 0;
+
+			const reader = response.body?.getReader();
+			const stream = new ReadableStream({
+				async start(controller) {
+					if (reader) {
+						while (true) {
+							const { done, value } = await reader.read();
+							if (done) break;
+
+							downloadedSize += value.byteLength;
+							downloadProgress = (downloadedSize / totalSize) * 100;
+							controller.enqueue(value);
+						}
+					}
+					controller.close();
+				}
+			});
+
+			const blob = await new Response(stream).blob();
 			const objectUrl = window.URL.createObjectURL(blob);
 			const link = document.createElement('a');
 			link.href = objectUrl;
@@ -138,8 +182,17 @@
 		}
 	}
 
-	async function handleDownload(fileUrl: any, filename: any, index: any) {
+	// async function handleDownload(fileUrl: any, filename: any, index: any) {
+	// 	filteredData[index].loading = true;
+	// 	await downloadFile(fileUrl, filename);
+	// 	filteredData[index].loading = false;
+	// }
+
+	async function handleDownload(fileUrl: string, filename: string, index: number) {
 		filteredData[index].loading = true;
+		downloadProgress = 0;
+		downloadedSize = 0;
+		totalSize = 0;
 		await downloadFile(fileUrl, filename);
 		filteredData[index].loading = false;
 	}
@@ -166,6 +219,7 @@
 		const currentData = filteredData.length ? filteredData : data;
 		if (!audio.paused || !audio.src) {
 			audio.src = currentData[index].audioLink;
+			// audio.src = 'https://drive.usercontent.google.com/download?id=1ts1YGFn92OyPkVTYiLx-LOB8FAvq0SkJ&export=open&authuser=0';
 			currentTitle = currentData[index].title;
 			console.log(audio.src);
 		}
@@ -233,7 +287,7 @@
 	<input type="text" class="  pl-4" placeholder="Search items..." on:keyup={updateSearchTerm} />
 </div>
 
-<div class="mx-4">
+<div class="mx-4 flex space-x-3 border-b bg-slate-50 py-4">
 	<div class="flex">
 		<div class="">Sort :</div>
 		<select on:change={updateSortOption}>
@@ -252,18 +306,25 @@
 
 {#if data.length > 0}
 	<div class="list">
-		<VirtualList height={500} width="auto" itemCount={filteredData.length} {itemSize}>
-			<div slot="item" let:index let:style {style} class="row">
+		<VirtualList height={640} width="auto" itemCount={filteredData.length} {itemSize}>
+			<div slot="item" let:index let:style {style} class="row border-y">
 				<div class="">
 					{#if heards[filteredData[index].Id]}
-						<button class="text-green-500" on:click={() => toggleHeard(index)}>Heard</button>
+						<button
+							class="rounded-md border border-green-500 bg-green-100 px-1 py-1 text-xs text-green-500 shadow-lg"
+							on:click={() => toggleHeard(index)}>Heard</button
+						>
 					{:else}
-						<button class="text-red-500" on:click={() => toggleHeard(index)}>Unheard</button>
+						<button
+							class="rounded-md border border-red-500 bg-red-100 px-1 py-1 text-xs text-red-500 shadow-lg"
+							on:click={() => toggleHeard(index)}>Unheard</button
+						>
 					{/if}
 				</div>
+
 				<div class="ml-5">
 					{#if filteredData[index].loading}
-						<svg
+						<!-- <svg
 							class="h-8 w-8 animate-spin"
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
@@ -282,11 +343,40 @@
 								fill="currentColor"
 								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 							></path>
-						</svg>
+						</svg> -->
+						<div class="relative inline-block">
+							<svg class="h-8 w-8" viewBox="0 0 36 36">
+								<circle
+									class="stroke-current text-gray-200"
+									stroke-width="4"
+									fill="none"
+									cx="18"
+									cy="18"
+									r="15.9155"
+								/>
+								<path
+									class="stroke-current text-blue-600"
+									stroke-width="4"
+									stroke-dasharray={downloadProgress + ', 100'}
+									fill="none"
+									d="M18 2.0845
+									 a 15.9155 15.9155 0 0 1 0 31.831
+									 a 15.9155 15.9155 0 0 1 0 -31.831"
+								/>
+							</svg>
+						</div>
+						<!-- <span class="absolute inset-0 flex items-center justify-center text-xs text-gray-800">
+							
+						</span> -->
+						<div class="whitespace-nowrap text-xs text-gray-600">
+							{Math.round(downloadProgress)}% . {Math.round(downloadedSize / (1024 * 1024))} /{Math.round(
+								totalSize / (1024 * 1024)
+							)} MB
+						</div>
 					{:else}
 						<button
 							type="button"
-							class="flex items-center rounded-md border border-black bg-slate-100 px-2 py-2 text-center text-sm shadow-xl"
+							class="flex items-center rounded-full border px-2 py-2 text-center text-sm shadow-xl"
 							on:click={() =>
 								handleDownload(
 									filteredData[index].audioLink,
@@ -296,12 +386,12 @@
 							tabIndex={0}
 							aria-label={`Download ${filteredData[index].title}.mp3`}
 						>
-							Download
+							<Download class="h-4 w-4 " />
 						</button>
 					{/if}
 				</div>
 				<button
-					class=" whitespace-nowrap"
+					class=" ml-4 whitespace-nowrap text-lg font-semibold"
 					on:click={() => {
 						currentIndex = index;
 						playAudio(index);
@@ -516,6 +606,8 @@
 				<option value="1.5">1.5x</option>
 				<option value="2">2x</option>
 			</select>
+
+			<Share2Icon />
 		</div>
 	</div>
 </div>
@@ -539,12 +631,6 @@
 	.ml-5 {
 		margin-left: 20px;
 	}
-	.text-green-500 {
-		color: green;
-	}
-	.text-red-500 {
-		color: red;
-	}
 
 	:global(body),
 	:global(html) {
@@ -554,7 +640,7 @@
 	}
 
 	:global(.virtual-list-wrapper) {
-		margin: 20px;
+		/* margin: 20px; */
 		background: #fff;
 		/* border-top: 1px solid black; */
 		border-radius: 5px;
