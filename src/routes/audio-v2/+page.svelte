@@ -7,15 +7,10 @@
 	export let data;
 	data = data.data;
 
-	// let data1: any = [];
 	let sortOption = 'date'; // Default sort option
-	let sortOrder = 'asc'; // Default sort order (ascending)
+	let sortOrder = 'asc'; // npm i --save-dev @types/lite-youtube-embedDefault sort order (ascending)
 
 	$: heards = {} as any;
-
-	let downloadProgress = 0;
-	let totalSize = 0;
-	let downloadedSize = 0;
 
 	function exportHeardData() {
 		const data = Object.entries(heards)
@@ -126,30 +121,32 @@
 			return 0;
 		});
 
-	// async function downloadFile(url: any, filename: any) {
-	// 	try {
-	// 		const response = await fetch(url);
-	// 		const blob = await response.blob();
-	// 		const objectUrl = window.URL.createObjectURL(blob);
-	// 		const link = document.createElement('a');
-	// 		link.href = objectUrl;
-	// 		link.download = filename;
-	// 		document.body.appendChild(link);
-	// 		link.click();
-	// 		document.body.removeChild(link);
-	// 		window.URL.revokeObjectURL(objectUrl);
-	// 	} catch (error) {
-	// 		console.error('Download failed:', error);
-	// 	}
-	// }
+	let downloadStates: Record<
+		string,
+		{
+			progress: number;
+			totalSize: number;
+			downloadedSize: number;
+			loading: boolean;
+		}
+	> = {};
 
-	async function downloadFile(url: string, filename: string) {
+	// Main download function to handle downloading multiple files simultaneously
+	async function downloadFile(url: string, filename: string, id: string) {
 		try {
+			// Initialize state for the download
+			downloadStates[id] = {
+				progress: 0,
+				totalSize: 0,
+				downloadedSize: 0,
+				loading: true
+			};
+
 			const response = await fetch(url);
 			if (!response.ok) throw new Error('Download failed');
 
 			const contentLength = response.headers.get('content-length');
-			totalSize = contentLength ? parseInt(contentLength, 10) : 0;
+			downloadStates[id].totalSize = contentLength ? parseInt(contentLength, 10) : 0;
 
 			const reader = response.body?.getReader();
 			const stream = new ReadableStream({
@@ -159,8 +156,9 @@
 							const { done, value } = await reader.read();
 							if (done) break;
 
-							downloadedSize += value.byteLength;
-							downloadProgress = (downloadedSize / totalSize) * 100;
+							downloadStates[id].downloadedSize += value.byteLength;
+							downloadStates[id].progress =
+								(downloadStates[id].downloadedSize / downloadStates[id].totalSize) * 100;
 							controller.enqueue(value);
 						}
 					}
@@ -177,24 +175,24 @@
 			link.click();
 			document.body.removeChild(link);
 			window.URL.revokeObjectURL(objectUrl);
+
+			downloadStates[id].loading = false;
 		} catch (error) {
 			console.error('Download failed:', error);
+			downloadStates[id].loading = false;
 		}
 	}
 
-	// async function handleDownload(fileUrl: any, filename: any, index: any) {
-	// 	filteredData[index].loading = true;
-	// 	await downloadFile(fileUrl, filename);
-	// 	filteredData[index].loading = false;
-	// }
+	// Trigger download function
+	async function handleDownload(fileUrl: string, filename: string, id: string) {
+		await downloadFile(fileUrl, filename, id);
+	}
 
-	async function handleDownload(fileUrl: string, filename: string, index: number) {
-		filteredData[index].loading = true;
-		downloadProgress = 0;
-		downloadedSize = 0;
-		totalSize = 0;
-		await downloadFile(fileUrl, filename);
-		filteredData[index].loading = false;
+	// Example: Usage within a component
+	function downloadButtonHandler(itemId: string, fileUrl: string, fileName: string) {
+		if (!downloadStates[itemId]?.loading) {
+			handleDownload(fileUrl, fileName, itemId);
+		}
 	}
 
 	function toggleHeard(index: any) {
@@ -287,7 +285,7 @@
 	<input type="text" class="  pl-4" placeholder="Search items..." on:keyup={updateSearchTerm} />
 </div>
 
-<div class="mx-4 flex space-x-3 border-b bg-slate-50 py-4">
+<div class="flex space-x-3 border-b bg-slate-50 px-4 py-4 shadow-2xl shadow-black">
 	<div class="flex">
 		<div class="">Sort :</div>
 		<select on:change={updateSortOption}>
@@ -306,92 +304,108 @@
 
 {#if data.length > 0}
 	<div class="list">
-		<VirtualList height={640} width="auto" itemCount={filteredData.length} {itemSize}>
+		<VirtualList height={560} width="auto" itemCount={filteredData.length} {itemSize}>
 			<div slot="item" let:index let:style {style} class="row border-y">
 				<div class="">
-					{#if heards[filteredData[index].Id]}
-						<button
-							class="rounded-md border border-green-500 bg-green-100 px-1 py-1 text-xs text-green-500 shadow-lg"
-							on:click={() => toggleHeard(index)}>Heard</button
-						>
-					{:else}
-						<button
-							class="rounded-md border border-red-500 bg-red-100 px-1 py-1 text-xs text-red-500 shadow-lg"
-							on:click={() => toggleHeard(index)}>Unheard</button
-						>
-					{/if}
-				</div>
-
-				<div class="ml-5">
-					{#if filteredData[index].loading}
-						<!-- <svg
-							class="h-8 w-8 animate-spin"
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-						>
-							<circle
-								class="opacity-25"
-								cx="12"
-								cy="12"
-								r="10"
-								stroke="currentColor"
-								stroke-width="4"
-							></circle>
-							<path
-								class="opacity-75"
-								fill="currentColor"
-								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-							></path>
-						</svg> -->
+					{#if downloadStates[filteredData[index].sortId]?.loading}
 						<div class="relative inline-block">
-							<svg class="h-8 w-8" viewBox="0 0 36 36">
-								<circle
-									class="stroke-current text-gray-200"
-									stroke-width="4"
-									fill="none"
-									cx="18"
-									cy="18"
-									r="15.9155"
-								/>
-								<path
-									class="stroke-current text-blue-600"
-									stroke-width="4"
-									stroke-dasharray={downloadProgress + ', 100'}
-									fill="none"
-									d="M18 2.0845
-									 a 15.9155 15.9155 0 0 1 0 31.831
-									 a 15.9155 15.9155 0 0 1 0 -31.831"
-								/>
-							</svg>
+							<div class="flex items-center space-x-2">
+								<div class=" text-x">
+									{Math.round(downloadStates[filteredData[index].sortId].progress)}%
+								</div>
+								<svg class="h-8 w-8" viewBox="0 0 36 36">
+									<circle
+										class="stroke-current text-gray-200"
+										stroke-width="4"
+										fill="none"
+										cx="18"
+										cy="18"
+										r="15.9155"
+									/>
+									<path
+										class="stroke-current text-blue-300"
+										stroke-width="4"
+										stroke-dasharray={`${downloadStates[filteredData[index].sortId].progress}, 100`}
+										fill="none"
+										d="M18 2.0845
+							 a 15.9155 15.9155 0 0 1 0 31.831
+							 a 15.9155 15.9155 0 0 1 0 -31.831"
+									/>
+								</svg>
+							</div>
 						</div>
-						<!-- <span class="absolute inset-0 flex items-center justify-center text-xs text-gray-800">
-							
-						</span> -->
 						<div class="whitespace-nowrap text-xs text-gray-600">
-							{Math.round(downloadProgress)}% . {Math.round(downloadedSize / (1024 * 1024))} /{Math.round(
-								totalSize / (1024 * 1024)
+							{Math.round(
+								downloadStates[filteredData[index].sortId].downloadedSize / (1024 * 1024)
+							)} / {Math.round(
+								downloadStates[filteredData[index].sortId].totalSize / (1024 * 1024)
 							)} MB
 						</div>
 					{:else}
 						<button
 							type="button"
-							class="flex items-center rounded-full border px-2 py-2 text-center text-sm shadow-xl"
+							class="flex items-center rounded-full px-2 py-2 text-center shadow-xl"
 							on:click={() =>
-								handleDownload(
+								downloadButtonHandler(
+									filteredData[index].sortId,
 									filteredData[index].audioLink,
-									`${filteredData[index].title}.mp3`,
-									index
+									`${filteredData[index].title}.mp3`
 								)}
 							tabIndex={0}
 							aria-label={`Download ${filteredData[index].title}.mp3`}
 						>
-							<Download class="h-4 w-4 " />
+							<Download class="h-4 w-4 text-black" />
+						</button>
+					{/if}
+				</div>
+
+				<div class="ml-3">
+					{#if heards[filteredData[index].Id]}
+						<button
+							class="rounded-md border border-green-500 bg-green-100 px-1 py-1 text-[10px] text-green-500 shadow-lg"
+							on:click={() => toggleHeard(index)}>Heard</button
+						>
+					{:else}
+						<button
+							class="rounded-md border border-red-500 bg-red-100 px-1 py-1 text-[10px] text-red-500 shadow-lg"
+							on:click={() => toggleHeard(index)}>Heard</button
+						>
+					{/if}
+				</div>
+				<div class="ml-3">
+					{#if filteredData[index].youtubeLinkExists}
+						<a href={filteredData[index].youtubeLink} target="_blank">
+							<svg
+								role="img"
+								class="h-5 w-5 fill-current text-red-500"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+								><title>YouTube</title><path
+									d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+								/></svg
+							>
+						</a>
+					{:else}
+						<button
+							on:click={() => {
+								currentIndex = index;
+								playAudio(index);
+							}}
+						>
+							<svg
+								role="img"
+								class="h-5 w-5 fill-current text-gray-500"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+								><title>YouTube</title><path
+									d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+								/></svg
+							>
 						</button>
 					{/if}
 				</div>
 				<button
-					class=" ml-4 whitespace-nowrap text-lg font-semibold"
+					class=" ml-3 whitespace-nowrap text-lg font-semibold"
 					on:click={() => {
 						currentIndex = index;
 						playAudio(index);
@@ -418,7 +432,7 @@
 	<input type="number" min="0" on:change={jumpToTimestamp} placeholder="Jump to (s)" />
 </div> -->
 
-<div class="fixed bottom-2 left-0 right-0 w-full">
+<div class=" fixed bottom-2 left-0 right-0 w-full border-t">
 	<div
 		class="items-center space-y-2 rounded-t-xl border-b border-slate-100 bg-white p-2 pb-3 dark:border-slate-500 dark:bg-slate-800 sm:space-y-8 sm:p-10 sm:pb-8 lg:space-y-6 lg:p-6"
 	>
@@ -462,6 +476,7 @@
 			</div>
 		</div>
 	</div>
+
 	<div class="flex items-center rounded-b-xl bg-slate-50 text-slate-500">
 		<div class="flex flex-auto items-center justify-evenly">
 			<!-- <button type="button" aria-label="Add to favorites">
@@ -627,9 +642,6 @@
 		display: flex;
 		align-items: center;
 		cursor: pointer;
-	}
-	.ml-5 {
-		margin-left: 20px;
 	}
 
 	:global(body),
