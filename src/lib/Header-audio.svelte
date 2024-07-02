@@ -27,9 +27,9 @@
 	});
 </script>
 
-<nav class="sticky top-0 z-[100] bg-blue-50 shadow">
+<nav class="sticky top-0 z-[100] bg-blue-50 shadow rounded-b-xl">
 	<!-- <nav class="sticky top-0 z-[100] bg-[#FAEEF4] shadow"> -->
-	<div class="container mx-auto px-6 py-4">
+	<div class=" mx-auto px-6 py-4">
 		<div class="flex items-center justify-between">
 			<a
 				href="/"
@@ -49,7 +49,15 @@
 						alt=""
 					/>
 				</picture>
-				<div class="ml-3">HG Savyasachi Prabhu</div>
+				<div class="ml-3 flex flex-col justify-center ">
+				<div class="">	
+					HG Savyasachi Prabhu
+				</div>
+				<div class="text-sm font-light">
+					Audio Archives
+				</div>
+				
+				</div>
 			</a>
 
 			<!-- Mobile menu button -->

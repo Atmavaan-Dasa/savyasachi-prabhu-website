@@ -3,8 +3,12 @@
 	import { onMount } from 'svelte';
 	import VirtualList from 'svelte-tiny-virtual-list';
 	import HeaderAudio from '$lib/Header-audio.svelte';
-	import { Share2Icon, Download ,Filter ,ArrowDownNarrowWide } from 'lucide-svelte';
+	import { Share2Icon, Download ,Filter ,ArrowDownNarrowWide , ArrowUpFromLine , ArrowDownFromLine }  from 'lucide-svelte';
 	import { data } from '$lib/utils/output.js';
+	import { Button } from "$lib/components/ui/button/index.js";
+	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
+	import DropdownMenuItem from '$lib/components/ui/dropdown-menu/dropdown-menu-item.svelte';
+	import DropdownMenuSeparator from '$lib/components/ui/dropdown-menu/dropdown-menu-separator.svelte';
 	// export let data;
 	// data = data.data;
 
@@ -283,34 +287,106 @@
 
 <HeaderAudio />
 
-<div class="flex px-2 bg-white shadow-none rounded-md py-2  flex-1">
-	<input type="text" class=" h-[30px] pl-4 rounded-lg " placeholder="Search items..." on:keyup={updateSearchTerm} />
-	<Filter/>
-	<ArrowDownNarrowWide/>
+<div class="flex px-2 bg-white shadow-xl border-b  py-2 pt-3 flex-1">
+	<input type="text" class=" h-[40px] pl-4 rounded-lg " placeholder="Search items..." on:keyup={updateSearchTerm} />
+
+
+	<DropdownMenu.Root>
+		<DropdownMenu.Trigger asChild let:builder>
+		 
+		  <Button variant="outline" class="p-0 border-0" builders={[builder]}>
+			<ArrowDownNarrowWide class="h-[40px] mx-2"/>
+		  </Button>
+		</DropdownMenu.Trigger>
+		<DropdownMenu.Content class="w-56"> 
+			
+		  <DropdownMenu.Label>Sort By</DropdownMenu.Label>
+		  <DropdownMenu.Separator/>
+		  <Button class="ml-2 font-medium py-0" variant="outline" on:click={toggleSortOrder}>
+			{sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+		</Button>
+		  <DropdownMenu.Separator />
+		  <DropdownMenu.RadioGroup bind:value={sortOption}>
+			<DropdownMenu.RadioItem value="date">Date</DropdownMenu.RadioItem>
+			<DropdownMenu.RadioItem value="duration">Duration</DropdownMenu.RadioItem>
+			<DropdownMenu.RadioItem value="heard">Heard</DropdownMenu.RadioItem>
+			<DropdownMenu.RadioItem value="scripture">Scripture</DropdownMenu.RadioItem>
+		  </DropdownMenu.RadioGroup>
+		</DropdownMenu.Content>
+	  </DropdownMenu.Root>
+	  <Filter class="h-[40px] "/>
+	
 </div>
 
-<div class="flex space-x-3 border-b bg-slate-50 px-4 py-4 shadow-black">
-	<div class="flex">
-		<div class="">Sort :</div>
-		<select on:change={updateSortOption}>
-			<option value="date">Date</option>
-			<option value="duration">Duration</option>
-			<option value="heard">Heard</option>
-			<option value="scripture">Scripture</option>
-		</select>
-	</div>
-	<button on:click={toggleSortOrder}>
-		{sortOrder === 'asc' ? 'Ascending' : 'Descenting'}
-	</button>
-	<button on:click={exportHeardData} class=" rounded-lg border bg-slate-100">Export</button>
-	<button on:click={importHeardData} class="">Import</button>
-</div>
 
 {#if data.length > 0}
 	<div class="list">
 		<VirtualList height={600} width="auto" itemCount={filteredData.length} {itemSize}>
-			<div slot="item" let:index let:style {style} class="row border-y">
+			<div slot="item" let:index let:style {style} class="row w-full border-y flex  items-center">
+		
 				<div class="">
+					{#if filteredData[index].youtubeLinkExists}
+						<a href={filteredData[index].youtubeLink} target="_blank">
+							<svg
+								role="img"
+								class="h-5 w-5 fill-current text-red-500"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+								><title>YouTube</title><path
+									d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+								/></svg
+							>
+						</a>
+					{:else}
+						<button
+							on:click={() => {
+								currentIndex = index;
+								playAudio(index);
+							}}
+							class="mt-1"
+						>
+							<svg
+								role="img"
+								class="h-5 w-5 fill-current text-gray-500"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+								><title>YouTube</title><path
+									d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+								/></svg
+							>
+						</button>
+					{/if}
+				</div>
+
+				<div class="ml-3">
+					{#if heards[filteredData[index].Id]}
+						<button
+							class="rounded-md border border-green-500 bg-green-100 px-1 py-1 text-[10px] text-green-500 shadow-lg"
+							on:click={() => toggleHeard(index)}>Heard</button
+						>
+					{:else}
+						<button
+							class="rounded-md border border-red-500 bg-red-100 px-1 py-1 text-[10px] text-red-500 shadow-lg"
+							on:click={() => toggleHeard(index)}>Heard</button
+						>
+					{/if}
+				</div>
+				
+				<div class=" ml-3 overflow-x-auto ">
+				<button
+					class=" text-lg font-medium  w-full "
+					on:click={() => {
+						currentIndex = index;
+						playAudio(index);
+
+					}}>
+					<div class=" whitespace-nowrap">
+					{filteredData[index].title}
+				</div>
+					</button
+				>
+				</div>
+				<div class=" ml-auto mr-2 md:mr-4">
 					{#if downloadStates[filteredData[index].sortId]?.loading}
 						<div class="relative inline-block">
 							<div class="flex items-center space-x-2">
@@ -348,7 +424,7 @@
 					{:else}
 						<button
 							type="button"
-							class="flex items-center rounded-full px-2 py-2 text-center shadow-xl"
+							class="flex items-center border rounded-full px-2 py-2 text-center shadow-xl"
 							on:click={() =>
 								downloadButtonHandler(
 									filteredData[index].sortId,
@@ -362,59 +438,6 @@
 						</button>
 					{/if}
 				</div>
-
-				<div class="ml-3">
-					{#if heards[filteredData[index].Id]}
-						<button
-							class="rounded-md border border-green-500 bg-green-100 px-1 py-1 text-[10px] text-green-500 shadow-lg"
-							on:click={() => toggleHeard(index)}>Heard</button
-						>
-					{:else}
-						<button
-							class="rounded-md border border-red-500 bg-red-100 px-1 py-1 text-[10px] text-red-500 shadow-lg"
-							on:click={() => toggleHeard(index)}>Heard</button
-						>
-					{/if}
-				</div>
-				<div class="ml-3">
-					{#if filteredData[index].youtubeLinkExists}
-						<a href={filteredData[index].youtubeLink} target="_blank">
-							<svg
-								role="img"
-								class="h-5 w-5 fill-current text-red-500"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-								><title>YouTube</title><path
-									d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
-								/></svg
-							>
-						</a>
-					{:else}
-						<button
-							on:click={() => {
-								currentIndex = index;
-								playAudio(index);
-							}}
-						>
-							<svg
-								role="img"
-								class="h-5 w-5 fill-current text-gray-500"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-								><title>YouTube</title><path
-									d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
-								/></svg
-							>
-						</button>
-					{/if}
-				</div>
-				<button
-					class=" ml-3 whitespace-nowrap text-lg font-medium  "
-					on:click={() => {
-						currentIndex = index;
-						playAudio(index);
-					}}>{filteredData[index].title}</button
-				>
 			</div>
 		</VirtualList>
 	</div>
@@ -447,6 +470,21 @@
 				</p>
 			</div>
 		</div>
+	
+		<div class=" flex  justify-end space-x-2">
+		<Button on:click={exportHeardData} variant="outline" size="sm" class="px-2 shadow-md pr-3 flex rounded-lg border">
+	<ArrowUpFromLine class="h-4 w-4"/>	
+	<div class="ml-2">
+	Export
+</div>
+	</Button>
+	<Button on:click={importHeardData}  variant="outline" size="sm" class="px-2 shadow-md pr-3 flex rounded-lg border">
+		<ArrowDownFromLine  class="h-4 w-4"/>
+	<div class="ml-2">
+		Import
+	</div>
+	</Button>
+	</div>
 
 		<div class="seekbar w-full">
 			<input
@@ -458,6 +496,7 @@
 				on:input={updateCurrentTime}
 			/>
 		</div>
+		
 
 		<div class="flex justify-between text-sm font-medium tabular-nums leading-6">
 			<div class="text-cyan-500 dark:text-slate-100">
