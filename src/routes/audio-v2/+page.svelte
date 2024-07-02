@@ -3,12 +3,14 @@
 	import { onMount } from 'svelte';
 	import VirtualList from 'svelte-tiny-virtual-list';
 	import HeaderAudio from '$lib/Header-audio.svelte';
-	import { Share2Icon, Download } from 'lucide-svelte';
-	export let data;
-	data = data.data;
+	import { Share2Icon, Download ,Filter ,ArrowDownNarrowWide } from 'lucide-svelte';
+	import { data } from '$lib/utils/output.js';
+	// export let data;
+	// data = data.data;
+
 
 	let sortOption = 'date'; // Default sort option
-	let sortOrder = 'asc'; // npm i --save-dev @types/lite-youtube-embedDefault sort order (ascending)
+	let sortOrder = 'asc'; //Default sort order (ascending)
 
 	$: heards = {} as any;
 
@@ -51,7 +53,7 @@
 		document.body.removeChild(input);
 	}
 
-	let itemSize = 80;
+	let itemSize = 60;
 	let audio: HTMLAudioElement;
 	let currentIndex = 0;
 	let playbackRate = 1;
@@ -281,11 +283,13 @@
 
 <HeaderAudio />
 
-<div class="flex w-full flex-1">
-	<input type="text" class="  pl-4" placeholder="Search items..." on:keyup={updateSearchTerm} />
+<div class="flex px-2 bg-white shadow-none rounded-md py-2  flex-1">
+	<input type="text" class=" h-[30px] pl-4 rounded-lg " placeholder="Search items..." on:keyup={updateSearchTerm} />
+	<Filter/>
+	<ArrowDownNarrowWide/>
 </div>
 
-<div class="flex space-x-3 border-b bg-slate-50 px-4 py-4 shadow-2xl shadow-black">
+<div class="flex space-x-3 border-b bg-slate-50 px-4 py-4 shadow-black">
 	<div class="flex">
 		<div class="">Sort :</div>
 		<select on:change={updateSortOption}>
@@ -304,7 +308,7 @@
 
 {#if data.length > 0}
 	<div class="list">
-		<VirtualList height={560} width="auto" itemCount={filteredData.length} {itemSize}>
+		<VirtualList height={600} width="auto" itemCount={filteredData.length} {itemSize}>
 			<div slot="item" let:index let:style {style} class="row border-y">
 				<div class="">
 					{#if downloadStates[filteredData[index].sortId]?.loading}
@@ -405,7 +409,7 @@
 					{/if}
 				</div>
 				<button
-					class=" ml-3 whitespace-nowrap text-lg font-semibold"
+					class=" ml-3 whitespace-nowrap text-lg font-medium  "
 					on:click={() => {
 						currentIndex = index;
 						playAudio(index);
@@ -677,13 +681,13 @@
 		padding-left: 20px;
 	}
 	input[type='text'] {
-		height: 50px;
+		/* height: 50px; */
 		/* max-width: 1900px; */
 		width: 100%;
 		/* padding: 5px;
 		margin: 20px; */
 		border: 1px solid #ccc;
-		border-radius: 5px;
+		/* border-radius: 10px; */
 	}
 
 	:global(input::-moz-focus-inner),

@@ -13,6 +13,8 @@
 	function handleLoaded(index: any) {
 		loaded[index] = true;
 	}
+
+	// import LiteYoutube from '$lib/LiteYoutube.svelte';
 </script>
 
 <main class="flex min-h-[70%] flex-col items-center bg-white py-10">
@@ -20,6 +22,8 @@
 		<h1 class="text-lg">Prominent</h1>
 		<h2 class="text-4xl font-bold">Lectures from H.G. Savyasachi Prabhu Ji</h2>
 	</header>
+
+	<!-- <LiteYoutube videoId="P9AkLbt80_c" /> -->
 	<section class="grid max-w-7xl grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
 		{#each videoLinks as videoLink, index}
 			<div class="relative rounded bg-white shadow">
