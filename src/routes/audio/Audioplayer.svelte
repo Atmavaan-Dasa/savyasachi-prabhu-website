@@ -107,16 +107,22 @@
 			filters[filterType] = {};
 		}
 		filters[filterType][filterValue] = isChecked;
-	 // Save filters to local storage
+		// Save filters to local storage
 	}
 
 	$: filteredData = data
 		.filter((item: any) => {
 			const term = searchTerm.trim().replace(/\s+/g, ' ').toLowerCase().split(' ').filter(Boolean);
-			const matchesSearchTerm = term.every((t) => item.title.toLowerCase().includes(t) || item.details.some((detail: any) => detail.toLowerCase().includes(t)));
+			const matchesSearchTerm = term.every(
+				(t) =>
+					item.title.toLowerCase().includes(t) ||
+					item.details.some((detail: any) => detail.toLowerCase().includes(t))
+			);
 			const matchesFilters = Object.keys(filters).every((key) => {
 				const filter = filters[key];
-				return Object.keys(filter).every((filterKey) => filter[filterKey] ? item[key]?.includes(filterKey) : true);
+				return Object.keys(filter).every((filterKey) =>
+					filter[filterKey] ? item[key]?.includes(filterKey) : true
+				);
 			});
 			return matchesSearchTerm && matchesFilters;
 		})
@@ -146,7 +152,6 @@
 			if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
 			return 0;
 		});
-
 
 	let downloadStates: Record<
 		string,
@@ -354,7 +359,7 @@
 							<input
 								type="checkbox"
 								id="language-{language}"
-								checked={filters.language[language] || false} 
+								checked={filters.language[language] || false}
 								on:change={(e) => updateFilter(e, 'language', language)}
 							/>
 							<label for="language-{language}">{language}</label>
@@ -370,7 +375,7 @@
 							<input
 								type="checkbox"
 								id="shastra-{shastra}"
-								checked={filters.shastra[shastra] || false} 
+								checked={filters.shastra[shastra] || false}
 								on:change={(e) => updateFilter(e, 'shastra', shastra)}
 							/>
 							<label for="shastra-{shastra}">{shastra}</label>
@@ -396,7 +401,7 @@
 
 				<DropdownMenu.Label>Location</DropdownMenu.Label>
 				<DropdownMenu.Separator />
-				<div class="grid grid-cols-3">
+				<div class="grid grid-cols-1">
 					{#each Array.from(new Set(data.map((item) => item.location))).filter(Boolean) as location}
 						<div>
 							<input
