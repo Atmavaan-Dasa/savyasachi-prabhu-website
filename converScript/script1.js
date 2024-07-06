@@ -45,6 +45,9 @@ function parseHTMLTable(htmlString) {
         }
         const youtubeLinkExists = youtubeLink !== '';
 
+
+        
+
         const rowData = {
             Id: cells[6].textContent.trim(),
             title: title,

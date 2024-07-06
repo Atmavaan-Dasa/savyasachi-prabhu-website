@@ -28,33 +28,28 @@
 	<div class="container mx-auto px-6 py-4 md:flex md:items-center md:justify-between">
 		<div class="flex items-center justify-between">
 			<a
-			href="/"
-			class={isOpen
-				? 'flex  items-center text-xl font-bold md:pb-0'
-				: 'flex items-center text-xl font-bold'}
-		>
-			<picture>
-				<source srcset={foot} type="image/webp" />
-				<img
-					src={lqip.src}
-					width={lqip.width}
-					height={lqip.height}
-					style="background-image: url('{lqip.lqip}'); background-size: cover;"
-					class="h-[3rem] w-auto"
-					loading="lazy"
-					alt=""
-				/>
-			</picture>
-			<div class="ml-3 flex flex-col justify-center ">
-			<div class="">	
-				HG Savyasachi Prabhu
-			</div>
-			<div class="text-sm font-light">
-				ISKCON Bhopal
-			</div>
-			
-			</div>
-		</a>
+				href="/"
+				class={isOpen
+					? 'flex  items-center text-xl font-bold md:pb-0'
+					: 'flex items-center text-xl font-bold'}
+			>
+				<picture>
+					<source srcset={foot} type="image/webp" />
+					<img
+						src={lqip.src}
+						width={lqip.width}
+						height={lqip.height}
+						style="background-image: url('{lqip.lqip}'); background-size: cover;"
+						class="h-[3rem] w-auto"
+						loading="lazy"
+						alt=""
+					/>
+				</picture>
+				<div class="ml-3 flex flex-col justify-center">
+					<div class="">HG Savyasachi Prabhu</div>
+					<div class="text-sm font-light">ISKCON Bhopal</div>
+				</div>
+			</a>
 
 			<!-- Mobile menu button -->
 			<div class="flex lg:hidden">
@@ -107,8 +102,6 @@
 						href="/">Contact</a
 					>
 				</div>
-
-			
 			</div>
 		{/if}
 

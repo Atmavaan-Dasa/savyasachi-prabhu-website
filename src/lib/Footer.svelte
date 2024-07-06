@@ -1,21 +1,17 @@
 <script>
-// @ts-nocheck
+	// @ts-nocheck
 
-
-	import foot from '$lib/pics/logo.webp?w=500;700;900;1200&as=srcset'
+	import foot from '$lib/pics/logo.webp?w=500;700;900;1200&as=srcset';
 	import lqip from '$lib/pics/logo.webp?lqip';
-	
 </script>
-
 
 <footer class="bg-[#352339]">
 	<div class="container mx-auto p-6">
 		<div class="lg:flex">
 			<div class="-mx-6 w-full lg:w-2/5">
 				<div class="px-6">
-					<a href="/" >
-					
-						<picture >
+					<a href="/">
+						<picture>
 							<source srcset={foot} type="image/webp" />
 							<img
 								src={lqip.src}

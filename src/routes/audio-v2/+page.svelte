@@ -3,18 +3,25 @@
 	import { onMount } from 'svelte';
 	import VirtualList from 'svelte-tiny-virtual-list';
 	import HeaderAudio from '$lib/Header-audio.svelte';
-	import { Share2Icon, Download ,Filter ,ArrowDownNarrowWide , ArrowUpFromLine , ArrowDownFromLine }  from 'lucide-svelte';
+	import {
+		Share2Icon,
+		Download,
+		Filter,
+		ArrowDownNarrowWide,
+		ArrowUpFromLine,
+		ArrowDownFromLine
+	} from 'lucide-svelte';
 	import { data } from '$lib/utils/output.js';
-	import { Button } from "$lib/components/ui/button/index.js";
-	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
+	import { Button } from '$lib/components/ui/button/index.js';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import DropdownMenuItem from '$lib/components/ui/dropdown-menu/dropdown-menu-item.svelte';
 	import DropdownMenuSeparator from '$lib/components/ui/dropdown-menu/dropdown-menu-separator.svelte';
 	// export let data;
 	// data = data.data;
-
+	import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
 
 	let sortOption = 'date'; // Default sort option
-	let sortOrder = 'asc'; //Default sort order (ascending)
+	let sortOrder = 'asc1'; //Default sort order (ascending)
 
 	$: heards = {} as any;
 
@@ -57,7 +64,7 @@
 		document.body.removeChild(input);
 	}
 
-	let itemSize = 60;
+	let itemSize = 70;
 	let audio: HTMLAudioElement;
 	let currentIndex = 0;
 	let playbackRate = 1;
@@ -87,20 +94,39 @@
 
 	$: searchTerm = '';
 
+	$: filters = {
+		year: {},
+		location: {},
+		language: {},
+		shastra: {}
+	};
+
+	function updateFilter(e: any, filterType: string, filterValue: string) {
+		const isChecked = e.target.checked;
+		if (!filters[filterType]) {
+			filters[filterType] = {};
+		}
+		filters[filterType][filterValue] = isChecked;
+	}
+
 	$: filteredData = data
 		.filter((item: any) => {
 			const term = searchTerm.trim().replace(/\s+/g, ' ').toLowerCase().split(' ').filter(Boolean);
-
-			return term.every((t) => {
-				return (
+			const matchesSearchTerm = term.every(
+				(t) =>
 					item.title.toLowerCase().includes(t) ||
 					item.details.some((detail: any) => detail.toLowerCase().includes(t))
+			);
+			const matchesFilters = Object.keys(filters).every((key) => {
+				const filter = filters[key];
+				return Object.keys(filter).every((filterKey) =>
+					filter[filterKey] ? item[key]?.includes(filterKey) : true
 				);
 			});
+			return matchesSearchTerm && matchesFilters;
 		})
 		.sort((a: any, b: any) => {
 			let aValue, bValue;
-
 			switch (sortOption) {
 				case 'date':
 					aValue = new Date(a.date);
@@ -121,11 +147,50 @@
 				default:
 					return 0;
 			}
-
 			if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
 			if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
 			return 0;
 		});
+
+	// $: filteredData = data
+	// 	.filter((item: any) => {
+	// 		const term = searchTerm.trim().replace(/\s+/g, ' ').toLowerCase().split(' ').filter(Boolean);
+
+	// 		return term.every((t) => {
+	// 			return (
+	// 				item.title.toLowerCase().includes(t) ||
+	// 				item.details.some((detail: any) => detail.toLowerCase().includes(t))
+	// 			);
+	// 		});
+	// 	})
+	// 	.sort((a: any, b: any) => {
+	// 		let aValue, bValue;
+
+	// 		switch (sortOption) {
+	// 			case 'date':
+	// 				aValue = new Date(a.date);
+	// 				bValue = new Date(b.date);
+	// 				break;
+	// 			case 'duration':
+	// 				aValue = a.duration;
+	// 				bValue = b.duration;
+	// 				break;
+	// 			case 'heard':
+	// 				aValue = heards[a.Id] ? 1 : 0;
+	// 				bValue = heards[b.Id] ? 1 : 0;
+	// 				break;
+	// 			case 'scripture':
+	// 				aValue = a.sortId;
+	// 				bValue = b.sortId;
+	// 				break;
+	// 			default:
+	// 				return 0;
+	// 		}
+
+	// 		if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+	// 		if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+	// 		return 0;
+	// 	});
 
 	let downloadStates: Record<
 		string,
@@ -287,113 +352,232 @@
 
 <HeaderAudio />
 
-<div class="flex px-2 bg-white shadow-xl border-b  py-2 pt-3 flex-1">
-	<input type="text" class=" h-[40px] pl-4 rounded-lg " placeholder="Search items..." on:keyup={updateSearchTerm} />
-
+<div class="gg flex flex-1 border-b bg-white px-2 py-2 pt-3 shadow-xl">
+	<input
+		type="text"
+		class=" h-[40px] rounded-lg pl-4"
+		placeholder="Search items..."
+		on:keyup={updateSearchTerm}
+	/>
 
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger asChild let:builder>
-		 
-		  <Button variant="outline" class="p-0 border-0" builders={[builder]}>
-			<ArrowDownNarrowWide class="h-[40px] mx-2"/>
-		  </Button>
+			<Button variant="outline" class="border-0 p-0" builders={[builder]}>
+				<ArrowDownNarrowWide class="mx-2 h-[40px]" />
+			</Button>
 		</DropdownMenu.Trigger>
-		<DropdownMenu.Content class="w-56"> 
-			
-		  <DropdownMenu.Label>Sort By</DropdownMenu.Label>
-		  <DropdownMenu.Separator/>
-		  <Button class="ml-2 font-medium py-0" variant="outline" on:click={toggleSortOrder}>
-			{sortOrder === 'asc' ? 'Ascending' : 'Descending'}
-		</Button>
-		  <DropdownMenu.Separator />
-		  <DropdownMenu.RadioGroup bind:value={sortOption}>
-			<DropdownMenu.RadioItem value="date">Date</DropdownMenu.RadioItem>
-			<DropdownMenu.RadioItem value="duration">Duration</DropdownMenu.RadioItem>
-			<DropdownMenu.RadioItem value="heard">Heard</DropdownMenu.RadioItem>
-			<DropdownMenu.RadioItem value="scripture">Scripture</DropdownMenu.RadioItem>
-		  </DropdownMenu.RadioGroup>
+		<DropdownMenu.Content class="w-56">
+			<DropdownMenu.Label>Sort By</DropdownMenu.Label>
+			<DropdownMenu.Separator />
+			<Button class="ml-2 py-0 font-medium" variant="outline" on:click={toggleSortOrder}>
+				{sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+			</Button>
+			<DropdownMenu.Separator />
+			<DropdownMenu.RadioGroup bind:value={sortOption}>
+				<DropdownMenu.RadioItem value="date">Date</DropdownMenu.RadioItem>
+				<DropdownMenu.RadioItem value="duration">Duration</DropdownMenu.RadioItem>
+				<DropdownMenu.RadioItem value="heard">Heard</DropdownMenu.RadioItem>
+				<DropdownMenu.RadioItem value="scripture">Scripture</DropdownMenu.RadioItem>
+			</DropdownMenu.RadioGroup>
 		</DropdownMenu.Content>
-	  </DropdownMenu.Root>
-	  <Filter class="h-[40px] "/>
-	
+	</DropdownMenu.Root>
+
+	<DropdownMenu.Root>
+		<DropdownMenu.Trigger asChild let:builder>
+			<Button variant="outline" class="border-0 p-0" builders={[builder]}>
+				<Filter class="h-[40px] " />
+			</Button>
+		</DropdownMenu.Trigger>
+		<DropdownMenu.Content class="h-[60%] w-56 overflow-y-scroll">
+			<ScrollArea>
+				<DropdownMenu.Label>Languages</DropdownMenu.Label>
+				<DropdownMenu.Separator />
+				<div class="grid grid-cols-3">
+					{#each Array.from(new Set(data.map((item) => item.language))).filter(Boolean) as language}
+						<div>
+							<input
+								type="checkbox"
+								id="language-{language}"
+								on:change={(e) => updateFilter(e, 'language', language)}
+							/>
+							<label for="language-{language}">{language}</label>
+						</div>
+					{/each}
+				</div>
+
+				<DropdownMenu.Label>Category</DropdownMenu.Label>
+				<DropdownMenu.Separator />
+				<div class="grid grid-cols-3">
+					{#each Array.from(new Set(data.map((item) => item.shastra))).filter(Boolean) as shastra}
+						<div>
+							<input
+								type="checkbox"
+								id="shastra-{shastra}"
+								on:change={(e) => updateFilter(e, 'shastra', shastra)}
+							/>
+							<label for="shastra-{shastra}">{shastra}</label>
+						</div>
+					{/each}
+				</div>
+
+				<DropdownMenu.Label>Year</DropdownMenu.Label>
+				<DropdownMenu.Separator />
+				<div class="grid grid-cols-3">
+					{#each Array.from(new Set(data.map((item) => item.year))).filter(Boolean) as year}
+						<div>
+							<input
+								type="checkbox"
+								id="year-{year}"
+								on:change={(e) => updateFilter(e, 'year', year)}
+							/>
+							<label for="year-{year}">{year}</label>
+						</div>
+					{/each}
+				</div>
+				<DropdownMenu.Label>Year</DropdownMenu.Label>
+				<DropdownMenu.Separator />
+				{#each Array.from(new Set(data.map((item) => item.location))).filter(Boolean) as location}
+					<div>
+						<input
+							type="checkbox"
+							id="location-{location}"
+							on:change={(e) => updateFilter(e, 'location', location)}
+						/>
+						<label for="location-{location}">{location}</label>
+					</div>
+				{/each}
+			</ScrollArea>
+		</DropdownMenu.Content>
+	</DropdownMenu.Root>
 </div>
 
-
-{#if data.length > 0}
-	<div class="list">
-		<VirtualList height={600} width="auto" itemCount={filteredData.length} {itemSize}>
-			<div slot="item" let:index let:style {style} class="row w-full border-y flex  items-center">
-		
-				<div class="">
-					{#if filteredData[index].youtubeLinkExists}
-						<a href={filteredData[index].youtubeLink} target="_blank">
-							<svg
-								role="img"
-								class="h-5 w-5 fill-current text-red-500"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-								><title>YouTube</title><path
-									d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
-								/></svg
-							>
-						</a>
-					{:else}
+<!-- {#if data.length > 0} -->
+<div class="list">
+	<VirtualList height={660} width="auto" itemCount={filteredData.length} {itemSize}>
+		<div
+			slot="item"
+			let:index
+			let:style
+			{style}
+			class="flex w-full items-center rounded-b-lg border-b-2 border-blue-50"
+		>
+			<div class="flex w-[70%] flex-col justify-center md:w-[90%] 2xl:w-[95%]">
+				<div class=" relative flex items-center">
+					<div class=" ml-3 overflow-x-auto">
 						<button
+							class=" w-full text-lg font-medium"
 							on:click={() => {
 								currentIndex = index;
 								playAudio(index);
 							}}
-							class="mt-1"
 						>
-							<svg
-								role="img"
-								class="h-5 w-5 fill-current text-gray-500"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-								><title>YouTube</title><path
-									d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
-								/></svg
-							>
+							<div class=" whitespace-nowrap font-medium text-gray-800">
+								{filteredData[index].title}
+							</div>
 						</button>
-					{/if}
+					</div>
 				</div>
+				<div class="top-4 ml-3 text-xs">
+					<div class="flex space-x-1">
+						<div class=" whitespace-nowrap">
+							<!-- <Clock class="w-4 h-4"/>	 -->
+							{filteredData[index].duration} min
+						</div>
 
-				<div class="ml-3">
+						<!-- <div class="flex">
+					
+						&middot;
+					
+						<div class="font-bold ml-1 text-gray-500">{filteredData[index].language}</div>
+					</div>
+					 -->
+
+						<div class=" whitespace-nowrap font-semibold text-gray-600">
+							&middot; {filteredData[index].shastra}
+						</div>
+
+						<div class=" whitespace-nowrap">
+							{#if filteredData[index].chapter && filteredData[index].shloka && filteredData[index].canto}
+								{`${filteredData[index].canto}.${filteredData[index].chapter}.${filteredData[index].shloka}`}
+							{:else if filteredData[index].chapter && filteredData[index].shloka}
+								{`${filteredData[index].chapter}.${filteredData[index].shloka}`}
+							{/if}
+						</div>
+
+						<div class=" whitespace-nowrap">
+							{#if filteredData[index].location}
+								<div class="">
+									&middot; {filteredData[index].location}
+								</div>
+							{/if}
+						</div>
+
+						<div class=" whitespace-nowrap">
+							{#if filteredData[index].date}
+								<div class="">
+									&middot; {filteredData[index].dateStr}
+								</div>
+							{/if}
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="mx-3">
+				{#if filteredData[index].youtubeLinkExists}
+					<a href={filteredData[index].youtubeLink} target="_blank">
+						<svg
+							role="img"
+							class="h-5 w-5 fill-current text-blue-500"
+							viewBox="0 0 24 24"
+							xmlns="http://www.w3.org/2000/svg"
+							><title>YouTube</title><path
+								d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+							/></svg
+						>
+					</a>
+				{:else}
+					<button
+						on:click={() => {
+							currentIndex = index;
+							playAudio(index);
+						}}
+						class="mt-1"
+					>
+						<svg
+							role="img"
+							class="h-5 w-5 fill-current text-gray-500"
+							viewBox="0 0 24 24"
+							xmlns="http://www.w3.org/2000/svg"
+							><title>YouTube</title><path
+								d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+							/></svg
+						>
+					</button>
+				{/if}
+			</div>
+			<div class="flex items-center justify-center">
+				<div class="mr-2">
 					{#if heards[filteredData[index].Id]}
 						<button
-							class="rounded-md border border-green-500 bg-green-100 px-1 py-1 text-[10px] text-green-500 shadow-lg"
+							class="rounded-md border border-blue-100 bg-blue-600 px-1 py-1 text-[10px] text-blue-100 shadow-lg shadow-blue-300"
 							on:click={() => toggleHeard(index)}>Heard</button
 						>
 					{:else}
 						<button
-							class="rounded-md border border-red-500 bg-red-100 px-1 py-1 text-[10px] text-red-500 shadow-lg"
+							class="bg-red-blue rounded-md border border-blue-400 px-1 py-1 text-[10px] text-blue-400 shadow-lg"
 							on:click={() => toggleHeard(index)}>Heard</button
 						>
 					{/if}
 				</div>
-				
-				<div class=" ml-3 overflow-x-auto ">
-				<button
-					class=" text-lg font-medium  w-full "
-					on:click={() => {
-						currentIndex = index;
-						playAudio(index);
 
-					}}>
-					<div class=" whitespace-nowrap">
-					{filteredData[index].title}
-				</div>
-					</button
-				>
-				</div>
 				<div class=" ml-auto mr-2 md:mr-4">
 					{#if downloadStates[filteredData[index].sortId]?.loading}
 						<div class="relative inline-block">
 							<div class="flex items-center space-x-2">
-								<div class=" text-x">
+								<div class=" text-sm">
 									{Math.round(downloadStates[filteredData[index].sortId].progress)}%
 								</div>
-								<svg class="h-8 w-8" viewBox="0 0 36 36">
+								<svg class="h-5 w-5" viewBox="0 0 36 36">
 									<circle
 										class="stroke-current text-gray-200"
 										stroke-width="4"
@@ -424,7 +608,7 @@
 					{:else}
 						<button
 							type="button"
-							class="flex items-center border rounded-full px-2 py-2 text-center shadow-xl"
+							class="flex items-center rounded-full border border-blue-100 px-2 py-2 text-center shadow-xl"
 							on:click={() =>
 								downloadButtonHandler(
 									filteredData[index].sortId,
@@ -439,9 +623,10 @@
 					{/if}
 				</div>
 			</div>
-		</VirtualList>
-	</div>
-{:else}
+		</div>
+	</VirtualList>
+</div>
+<!-- {:else}
 	<div
 		class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-primary motion-reduce:animate-[spin_1.5s_linear_infinite]"
 		role="status"
@@ -450,8 +635,8 @@
 			class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]"
 			>Loading...</span
 		>
-	</div>
-{/if}
+	</div>1]
+{/if} -->
 
 <!-- <div class="audio-controls">
 
@@ -461,7 +646,7 @@
 
 <div class=" fixed bottom-2 left-0 right-0 w-full border-t">
 	<div
-		class="items-center space-y-2 rounded-t-xl border-b border-slate-100 bg-white p-2 pb-3 dark:border-slate-500 dark:bg-slate-800 sm:space-y-8 sm:p-10 sm:pb-8 lg:space-y-6 lg:p-6"
+		class="items-center space-y-2 rounded-t-xl border-y border-gray-300 bg-slate-50 p-2 pb-3 dark:border-slate-500 dark:bg-slate-800 sm:space-y-8 sm:p-10 sm:pb-8 lg:space-y-6 lg:p-6"
 	>
 		<div class="flex items-center space-x-4">
 			<div class="min-w-0 flex-auto space-y-1 font-semibold">
@@ -470,21 +655,27 @@
 				</p>
 			</div>
 		</div>
-	
-		<div class=" flex  justify-end space-x-2">
-		<Button on:click={exportHeardData} variant="outline" size="sm" class="px-2 shadow-md pr-3 flex rounded-lg border">
-	<ArrowUpFromLine class="h-4 w-4"/>	
-	<div class="ml-2">
-	Export
-</div>
-	</Button>
-	<Button on:click={importHeardData}  variant="outline" size="sm" class="px-2 shadow-md pr-3 flex rounded-lg border">
-		<ArrowDownFromLine  class="h-4 w-4"/>
-	<div class="ml-2">
-		Import
-	</div>
-	</Button>
-	</div>
+
+		<div class=" flex justify-end space-x-2">
+			<Button
+				on:click={exportHeardData}
+				variant="outline"
+				size="sm"
+				class="lil flex rounded-lg border px-2 pr-3 shadow-lg"
+			>
+				<ArrowUpFromLine class="h-4 w-4" />
+				<div class="ml-2">Export</div>
+			</Button>
+			<Button
+				on:click={importHeardData}
+				variant="outline"
+				size="sm"
+				class="lil  flex rounded-lg border px-2 pr-3 shadow-lg"
+			>
+				<ArrowDownFromLine class="h-4 w-4" />
+				<div class="ml-2">Import</div>
+			</Button>
+		</div>
 
 		<div class="seekbar w-full">
 			<input
@@ -496,7 +687,6 @@
 				on:input={updateCurrentTime}
 			/>
 		</div>
-		
 
 		<div class="flex justify-between text-sm font-medium tabular-nums leading-6">
 			<div class="text-cyan-500 dark:text-slate-100">
@@ -520,7 +710,7 @@
 		</div>
 	</div>
 
-	<div class="flex items-center rounded-b-xl bg-slate-50 text-slate-500">
+	<div class="lol flex items-center rounded-b-xl bg-slate-50 text-slate-500">
 		<div class="flex flex-auto items-center justify-evenly">
 			<!-- <button type="button" aria-label="Add to favorites">
 				<svg width="24" height="24">
@@ -681,11 +871,6 @@
 	.list {
 		margin-bottom: 20px;
 	}
-	.row {
-		display: flex;
-		align-items: center;
-		cursor: pointer;
-	}
 
 	:global(body),
 	:global(html) {
@@ -709,16 +894,6 @@
 		-webkit-font-smoothing: antialiased;
 	}
 
-	.row {
-		/* padding: 0 15px; */
-
-		/* border-bottom: 1px solid #eee; */
-		box-sizing: border-box;
-		/* line-height: 70px; */
-		font-weight: 500;
-		background: #fff;
-		padding-left: 20px;
-	}
 	input[type='text'] {
 		/* height: 50px; */
 		/* max-width: 1900px; */
