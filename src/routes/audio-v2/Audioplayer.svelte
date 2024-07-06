@@ -95,10 +95,10 @@
 	$: searchTerm = '';
 
 	$: filters = {
-		year: {},
-		location: {},
-		language: {},
-		shastra: {}
+		year: {} as Record<string, boolean>,
+		location: {} as Record<string, boolean>,
+		language: {} as Record<string, boolean>,
+		shastra: {} as Record<string, boolean>
 	};
 
 	function updateFilter(e: any, filterType: string, filterValue: string) {
@@ -107,21 +107,16 @@
 			filters[filterType] = {};
 		}
 		filters[filterType][filterValue] = isChecked;
+	 // Save filters to local storage
 	}
 
 	$: filteredData = data
 		.filter((item: any) => {
 			const term = searchTerm.trim().replace(/\s+/g, ' ').toLowerCase().split(' ').filter(Boolean);
-			const matchesSearchTerm = term.every(
-				(t) =>
-					item.title.toLowerCase().includes(t) ||
-					item.details.some((detail: any) => detail.toLowerCase().includes(t))
-			);
+			const matchesSearchTerm = term.every((t) => item.title.toLowerCase().includes(t) || item.details.some((detail: any) => detail.toLowerCase().includes(t)));
 			const matchesFilters = Object.keys(filters).every((key) => {
 				const filter = filters[key];
-				return Object.keys(filter).every((filterKey) =>
-					filter[filterKey] ? item[key]?.includes(filterKey) : true
-				);
+				return Object.keys(filter).every((filterKey) => filter[filterKey] ? item[key]?.includes(filterKey) : true);
 			});
 			return matchesSearchTerm && matchesFilters;
 		})
@@ -152,45 +147,6 @@
 			return 0;
 		});
 
-	// $: filteredData = data
-	// 	.filter((item: any) => {
-	// 		const term = searchTerm.trim().replace(/\s+/g, ' ').toLowerCase().split(' ').filter(Boolean);
-
-	// 		return term.every((t) => {
-	// 			return (
-	// 				item.title.toLowerCase().includes(t) ||
-	// 				item.details.some((detail: any) => detail.toLowerCase().includes(t))
-	// 			);
-	// 		});
-	// 	})
-	// 	.sort((a: any, b: any) => {
-	// 		let aValue, bValue;
-
-	// 		switch (sortOption) {
-	// 			case 'date':
-	// 				aValue = new Date(a.date);
-	// 				bValue = new Date(b.date);
-	// 				break;
-	// 			case 'duration':
-	// 				aValue = a.duration;
-	// 				bValue = b.duration;
-	// 				break;
-	// 			case 'heard':
-	// 				aValue = heards[a.Id] ? 1 : 0;
-	// 				bValue = heards[b.Id] ? 1 : 0;
-	// 				break;
-	// 			case 'scripture':
-	// 				aValue = a.sortId;
-	// 				bValue = b.sortId;
-	// 				break;
-	// 			default:
-	// 				return 0;
-	// 		}
-
-	// 		if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-	// 		if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-	// 		return 0;
-	// 	});
 
 	let downloadStates: Record<
 		string,
@@ -385,7 +341,7 @@
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger asChild let:builder>
 			<Button variant="outline" class="border-0 p-0" builders={[builder]}>
-				<Filter class="h-[40px] " />
+				<Filter class="h-[40px]" />
 			</Button>
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content class="h-[60%] w-56 overflow-y-scroll">
@@ -398,6 +354,7 @@
 							<input
 								type="checkbox"
 								id="language-{language}"
+								checked={filters.language[language] || false} 
 								on:change={(e) => updateFilter(e, 'language', language)}
 							/>
 							<label for="language-{language}">{language}</label>
@@ -413,6 +370,7 @@
 							<input
 								type="checkbox"
 								id="shastra-{shastra}"
+								checked={filters.shastra[shastra] || false} 
 								on:change={(e) => updateFilter(e, 'shastra', shastra)}
 							/>
 							<label for="shastra-{shastra}">{shastra}</label>
@@ -428,24 +386,29 @@
 							<input
 								type="checkbox"
 								id="year-{year}"
+								checked={filters.year[year] || false}
 								on:change={(e) => updateFilter(e, 'year', year)}
 							/>
 							<label for="year-{year}">{year}</label>
 						</div>
 					{/each}
 				</div>
-				<DropdownMenu.Label>Year</DropdownMenu.Label>
+
+				<DropdownMenu.Label>Location</DropdownMenu.Label>
 				<DropdownMenu.Separator />
-				{#each Array.from(new Set(data.map((item) => item.location))).filter(Boolean) as location}
-					<div>
-						<input
-							type="checkbox"
-							id="location-{location}"
-							on:change={(e) => updateFilter(e, 'location', location)}
-						/>
-						<label for="location-{location}">{location}</label>
-					</div>
-				{/each}
+				<div class="grid grid-cols-3">
+					{#each Array.from(new Set(data.map((item) => item.location))).filter(Boolean) as location}
+						<div>
+							<input
+								type="checkbox"
+								id="location-{location}"
+								checked={filters.location[location] || false}
+								on:change={(e) => updateFilter(e, 'location', location)}
+							/>
+							<label for="location-{location}">{location}</label>
+						</div>
+					{/each}
+				</div>
 			</ScrollArea>
 		</DropdownMenu.Content>
 	</DropdownMenu.Root>
