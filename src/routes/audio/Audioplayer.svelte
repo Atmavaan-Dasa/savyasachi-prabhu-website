@@ -427,7 +427,7 @@
 			let:index
 			let:style
 			{style}
-			class="flex w-full items-center rounded-b-lg border-b-2 border-blue-50"
+			class="flex w-full items-center rounded-b-lg border-b-2 bg-[#fbfbfb]  border-blue-50"
 		>
 			<div class="flex w-[70%] flex-col justify-center md:w-[90%] 2xl:w-[95%]">
 				<div class=" relative flex items-center">
