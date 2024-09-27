@@ -27,7 +27,7 @@
 	});
 </script>
 
-<nav class="lil sticky top-0 z-[100] rounded-b-xl bg-blue-50 shadow">
+<nav class="lil sticky top-0 z-[100] rounded-b-xl bg-blue-100 shadow">
 	<!-- <nav class="sticky top-0 z-[100] bg-[#FAEEF4] shadow"> -->
 	<div class=" mx-auto px-6 py-4">
 		<div class="flex items-center justify-between">

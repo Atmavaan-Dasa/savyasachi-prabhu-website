@@ -9,7 +9,9 @@
 		Filter,
 		ArrowDownNarrowWide,
 		ArrowUpFromLine,
-		ArrowDownFromLine
+		ArrowDownFromLine,
+		EllipsisVertical,
+		Check
 	} from 'lucide-svelte';
 	import { data } from '$lib/utils/output.js';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -309,129 +311,208 @@
 	function updateCurrentTime(e: any) {
 		audio.currentTime = e.target.value;
 	}
+
+	let previousOffset = 0;
+	let showHeader = true;
+
+	function handleScroll(event) {
+		const currentOffset = event.detail.offset;
+
+		// Determine the scroll direction
+		if (currentOffset > previousOffset) {
+			// Scrolling down
+			showHeader = false;
+		} else {
+			// Scrolling up
+			showHeader = true;
+		}
+
+		// Update the previous offset
+		previousOffset = currentOffset;
+	}
 </script>
 
 <HeaderAudio />
 
-<div class="gg flex flex-1 border-b bg-white px-2 py-2 pt-3 shadow-xl">
-	<input
-		type="text"
-		class=" h-[40px] rounded-lg pl-4"
-		placeholder="Search items..."
-		on:keyup={updateSearchTerm}
-	/>
-
-	<DropdownMenu.Root>
-		<DropdownMenu.Trigger asChild let:builder>
-			<Button variant="outline" class="border-0 p-0" builders={[builder]}>
-				<ArrowDownNarrowWide class="mx-2 h-[40px]" />
-			</Button>
-		</DropdownMenu.Trigger>
-		<DropdownMenu.Content class="w-56">
-			<DropdownMenu.Label>Sort By</DropdownMenu.Label>
-			<DropdownMenu.Separator />
-			<Button class="ml-2 py-0 font-medium" variant="outline" on:click={toggleSortOrder}>
-				{sortOrder === 'asc' ? 'Ascending' : 'Descending'}
-			</Button>
-			<DropdownMenu.Separator />
-			<DropdownMenu.RadioGroup bind:value={sortOption}>
-				<DropdownMenu.RadioItem value="date">Date</DropdownMenu.RadioItem>
-				<DropdownMenu.RadioItem value="duration">Duration</DropdownMenu.RadioItem>
-				<DropdownMenu.RadioItem value="heard">Heard</DropdownMenu.RadioItem>
-				<DropdownMenu.RadioItem value="scripture">Scripture</DropdownMenu.RadioItem>
-			</DropdownMenu.RadioGroup>
-		</DropdownMenu.Content>
-	</DropdownMenu.Root>
-
-	<DropdownMenu.Root>
-		<DropdownMenu.Trigger asChild let:builder>
-			<Button variant="outline" class="border-0 p-0" builders={[builder]}>
-				<Filter class="h-[40px]" />
-			</Button>
-		</DropdownMenu.Trigger>
-		<DropdownMenu.Content class="h-[60%] w-56 overflow-y-scroll">
-			<ScrollArea>
-				<DropdownMenu.Label>Languages</DropdownMenu.Label>
-				<DropdownMenu.Separator />
-				<div class="grid grid-cols-3">
-					{#each Array.from(new Set(data.map((item) => item.language))).filter(Boolean) as language}
-						<div>
-							<input
-								type="checkbox"
-								id="language-{language}"
-								checked={filters.language[language] || false}
-								on:change={(e) => updateFilter(e, 'language', language)}
-							/>
-							<label for="language-{language}">{language}</label>
-						</div>
-					{/each}
-				</div>
-
-				<DropdownMenu.Label>Category</DropdownMenu.Label>
-				<DropdownMenu.Separator />
-				<div class="grid grid-cols-3">
-					{#each Array.from(new Set(data.map((item) => item.shastra))).filter(Boolean) as shastra}
-						<div>
-							<input
-								type="checkbox"
-								id="shastra-{shastra}"
-								checked={filters.shastra[shastra] || false}
-								on:change={(e) => updateFilter(e, 'shastra', shastra)}
-							/>
-							<label for="shastra-{shastra}">{shastra}</label>
-						</div>
-					{/each}
-				</div>
-
-				<DropdownMenu.Label>Year</DropdownMenu.Label>
-				<DropdownMenu.Separator />
-				<div class="grid grid-cols-3">
-					{#each Array.from(new Set(data.map((item) => item.year))).filter(Boolean) as year}
-						<div>
-							<input
-								type="checkbox"
-								id="year-{year}"
-								checked={filters.year[year] || false}
-								on:change={(e) => updateFilter(e, 'year', year)}
-							/>
-							<label for="year-{year}">{year}</label>
-						</div>
-					{/each}
-				</div>
-
-				<DropdownMenu.Label>Location</DropdownMenu.Label>
-				<DropdownMenu.Separator />
-				<div class="grid grid-cols-1">
-					{#each Array.from(new Set(data.map((item) => item.location))).filter(Boolean) as location}
-						<div>
-							<input
-								type="checkbox"
-								id="location-{location}"
-								checked={filters.location[location] || false}
-								on:change={(e) => updateFilter(e, 'location', location)}
-							/>
-							<label for="location-{location}">{location}</label>
-						</div>
-					{/each}
-				</div>
-			</ScrollArea>
-		</DropdownMenu.Content>
-	</DropdownMenu.Root>
-</div>
-
 <!-- {#if data.length > 0} -->
-<div class="list">
-	<VirtualList height={660} width="auto" itemCount={filteredData.length} {itemSize}>
+<div class="h-fit">
+	<!-- <div
+		 class="gg flex flex-1 border-b bg-white px-2 py-2 pt-3 shadow-xl" class:hidden-header={!showHeader} class:visible-header={showHeader} 
+	> -->
+	<div
+		class="gg flex flex-1 transform border-b bg-white px-2 py-2 pt-3 shadow-xl transition-all duration-300 ease-in-out"
+		class:hidden={!showHeader}
+	>
+		<input
+			type="text"
+			class=" h-[40px] rounded-lg pl-4"
+			placeholder="Search items..."
+			on:keyup={updateSearchTerm}
+		/>
+
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger asChild let:builder>
+				<Button variant="outline" class="border-0 p-0" builders={[builder]}>
+					<ArrowDownNarrowWide class="mx-2 h-[40px]" />
+				</Button>
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content class="w-56">
+				<DropdownMenu.Label>Sort By</DropdownMenu.Label>
+				<DropdownMenu.Separator />
+				<Button class="ml-2 py-0 font-medium" variant="outline" on:click={toggleSortOrder}>
+					{sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+				</Button>
+				<DropdownMenu.Separator />
+				<DropdownMenu.RadioGroup bind:value={sortOption}>
+					<DropdownMenu.RadioItem value="date">Date</DropdownMenu.RadioItem>
+					<DropdownMenu.RadioItem value="duration">Duration</DropdownMenu.RadioItem>
+					<DropdownMenu.RadioItem value="heard">Heard</DropdownMenu.RadioItem>
+					<DropdownMenu.RadioItem value="scripture">Scripture</DropdownMenu.RadioItem>
+				</DropdownMenu.RadioGroup>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger asChild let:builder>
+				<Button variant="outline" class="border-0 p-0" builders={[builder]}>
+					<Filter class="h-[40px]" />
+				</Button>
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content class="h-[60%] w-56 overflow-y-scroll">
+				<ScrollArea>
+					<DropdownMenu.Label>Languages</DropdownMenu.Label>
+					<DropdownMenu.Separator />
+					<div class="grid grid-cols-3">
+						{#each Array.from(new Set(data.map((item) => item.language))).filter(Boolean) as language}
+							<div>
+								<input
+									type="checkbox"
+									id="language-{language}"
+									checked={filters.language[language] || false}
+									on:change={(e) => updateFilter(e, 'language', language)}
+								/>
+								<label for="language-{language}">{language}</label>
+							</div>
+						{/each}
+					</div>
+
+					<DropdownMenu.Label>Category</DropdownMenu.Label>
+					<DropdownMenu.Separator />
+					<div class="grid grid-cols-3">
+						{#each Array.from(new Set(data.map((item) => item.shastra))).filter(Boolean) as shastra}
+							<div>
+								<input
+									type="checkbox"
+									id="shastra-{shastra}"
+									checked={filters.shastra[shastra] || false}
+									on:change={(e) => updateFilter(e, 'shastra', shastra)}
+								/>
+								<label for="shastra-{shastra}">{shastra}</label>
+							</div>
+						{/each}
+					</div>
+
+					<DropdownMenu.Label>Year</DropdownMenu.Label>
+					<DropdownMenu.Separator />
+					<div class="grid grid-cols-3">
+						{#each Array.from(new Set(data.map((item) => item.year))).filter(Boolean) as year}
+							<div>
+								<input
+									type="checkbox"
+									id="year-{year}"
+									checked={filters.year[year] || false}
+									on:change={(e) => updateFilter(e, 'year', year)}
+								/>
+								<label for="year-{year}">{year}</label>
+							</div>
+						{/each}
+					</div>
+
+					<DropdownMenu.Label>Location</DropdownMenu.Label>
+					<DropdownMenu.Separator />
+					<div class="grid grid-cols-1">
+						{#each Array.from(new Set(data.map((item) => item.location))).filter(Boolean) as location}
+							<div>
+								<input
+									type="checkbox"
+									id="location-{location}"
+									checked={filters.location[location] || false}
+									on:change={(e) => updateFilter(e, 'location', location)}
+								/>
+								<label for="location-{location}">{location}</label>
+							</div>
+						{/each}
+					</div>
+				</ScrollArea>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+	</div>
+	<VirtualList
+		height={660}
+		on:afterScroll={handleScroll}
+		width="auto"
+		itemCount={filteredData.length}
+		{itemSize}
+	>
 		<div
 			slot="item"
 			let:index
 			let:style
 			{style}
-			class="flex w-full items-center rounded-b-lg border-b-2 bg-[#fbfbfb]  border-blue-50"
+			class="flex w-full items-center justify-between rounded-b-lg border-b-2 border-blue-50 bg-[#fbfbfb]"
 		>
-			<div class="flex w-[70%] flex-col justify-center md:w-[90%] 2xl:w-[95%]">
+			<div class="ml-3">
+				{#if downloadStates[filteredData[index].sortId]?.loading}
+					<div class="relative inline-block">
+						<div class="flex items-center space-x-2">
+							<div class=" text-sm">
+								{Math.round(downloadStates[filteredData[index].sortId].progress)}%
+							</div>
+							<svg class="h-5 w-5" viewBox="0 0 36 36">
+								<circle
+									class="stroke-current text-gray-200"
+									stroke-width="4"
+									fill="none"
+									cx="18"
+									cy="18"
+									r="15.9155"
+								/>
+								<path
+									class="stroke-current text-blue-300"
+									stroke-width="4"
+									stroke-dasharray={`${downloadStates[filteredData[index].sortId].progress}, 100`}
+									fill="none"
+									d="M18 2.0845
+					 a 15.9155 15.9155 0 0 1 0 31.831
+					 a 15.9155 15.9155 0 0 1 0 -31.831"
+								/>
+							</svg>
+						</div>
+					</div>
+					<div class="whitespace-nowrap text-xs text-gray-600">
+						{Math.round(downloadStates[filteredData[index].sortId].downloadedSize / (1024 * 1024))} /
+						{Math.round(downloadStates[filteredData[index].sortId].totalSize / (1024 * 1024))} MB
+					</div>
+				{:else}
+					<button
+						type="button"
+						class="flex items-center rounded-full border border-blue-100 px-2 py-2 text-center shadow-md"
+						on:click={() =>
+							downloadButtonHandler(
+								filteredData[index].sortId,
+								filteredData[index].audioLink,
+								`${filteredData[index].title}.mp3`
+							)}
+						tabIndex={0}
+						aria-label={`Download ${filteredData[index].title}.mp3`}
+					>
+						<Download class="h-4 w-4 text-black" />
+					</button>
+				{/if}
+			</div>
+			<div class="flex w-[70%] flex-col md:w-[90%] 2xl:w-[95%]">
 				<div class=" relative flex items-center">
-					<div class=" ml-3 overflow-x-auto">
+					<div class=" overflow-x-auto">
 						<button
 							class=" w-full text-lg font-medium"
 							on:click={() => {
@@ -439,13 +520,13 @@
 								playAudio(index);
 							}}
 						>
-							<div class=" whitespace-nowrap font-medium text-gray-800">
+							<div class=" truncate font-serif text-gray-800">
 								{filteredData[index].title}
 							</div>
 						</button>
 					</div>
 				</div>
-				<div class="top-4 ml-3 text-xs">
+				<div class=" truncate text-[13px]">
 					<div class="flex space-x-1">
 						<div class=" whitespace-nowrap">
 							<!-- <Clock class="w-4 h-4"/>	 -->
@@ -490,7 +571,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="mx-3">
+			<!-- <div class="mx-3">
 				{#if filteredData[index].youtubeLinkExists}
 					<a href={filteredData[index].youtubeLink} target="_blank">
 						<svg
@@ -522,74 +603,86 @@
 						>
 					</button>
 				{/if}
-			</div>
+			</div> -->
 			<div class="flex items-center justify-center">
-				<div class="mr-2">
+				<div class="">
 					{#if heards[filteredData[index].Id]}
 						<button
-							class="rounded-md border border-blue-100 bg-blue-600 px-1 py-1 text-[10px] text-blue-100 shadow-lg shadow-blue-300"
-							on:click={() => toggleHeard(index)}>Heard</button
+							class="rounded-3xl border border-green-400 px-1 py-1 text-[10px] text-green-400"
+							on:click={() => toggleHeard(index)}
 						>
+							<Check class="h-4 w-4 font-bold" />
+						</button>
 					{:else}
 						<button
-							class="bg-red-blue rounded-md border border-blue-400 px-1 py-1 text-[10px] text-blue-400 shadow-lg"
-							on:click={() => toggleHeard(index)}>Heard</button
+							class="bg-red-blue rounded-3xl border border-blue-400 px-1 py-1 text-[10px] text-blue-400 shadow-lg"
+							on:click={() => toggleHeard(index)}
 						>
-					{/if}
-				</div>
-
-				<div class=" ml-auto mr-2 md:mr-4">
-					{#if downloadStates[filteredData[index].sortId]?.loading}
-						<div class="relative inline-block">
-							<div class="flex items-center space-x-2">
-								<div class=" text-sm">
-									{Math.round(downloadStates[filteredData[index].sortId].progress)}%
-								</div>
-								<svg class="h-5 w-5" viewBox="0 0 36 36">
-									<circle
-										class="stroke-current text-gray-200"
-										stroke-width="4"
-										fill="none"
-										cx="18"
-										cy="18"
-										r="15.9155"
-									/>
-									<path
-										class="stroke-current text-blue-300"
-										stroke-width="4"
-										stroke-dasharray={`${downloadStates[filteredData[index].sortId].progress}, 100`}
-										fill="none"
-										d="M18 2.0845
-							 a 15.9155 15.9155 0 0 1 0 31.831
-							 a 15.9155 15.9155 0 0 1 0 -31.831"
-									/>
-								</svg>
-							</div>
-						</div>
-						<div class="whitespace-nowrap text-xs text-gray-600">
-							{Math.round(
-								downloadStates[filteredData[index].sortId].downloadedSize / (1024 * 1024)
-							)} / {Math.round(
-								downloadStates[filteredData[index].sortId].totalSize / (1024 * 1024)
-							)} MB
-						</div>
-					{:else}
-						<button
-							type="button"
-							class="flex items-center rounded-full border border-blue-100 px-2 py-2 text-center shadow-xl"
-							on:click={() =>
-								downloadButtonHandler(
-									filteredData[index].sortId,
-									filteredData[index].audioLink,
-									`${filteredData[index].title}.mp3`
-								)}
-							tabIndex={0}
-							aria-label={`Download ${filteredData[index].title}.mp3`}
-						>
-							<Download class="h-4 w-4 text-black" />
+							<Check class="h-4 w-4 font-bold" />
 						</button>
 					{/if}
 				</div>
+
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger asChild let:builder>
+						<Button variant="outline" class="border-0 p-0" builders={[builder]}>
+							<EllipsisVertical class="mr-3 h-[40px]" />
+						</Button>
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content class="w-56">
+						<div class="mx-3">
+							{#if filteredData[index].youtubeLinkExists}
+								<a
+									href={filteredData[index].youtubeLink}
+									target="_blank"
+									class="items center flex space-x-2"
+								>
+									<svg
+										role="img"
+										class="h-5 w-5 fill-current text-red-500"
+										viewBox="0 0 24 24"
+										xmlns="http://www.w3.org/2000/svg"
+										><title>YouTube</title><path
+											d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+										/>
+									</svg>
+									<div class="">Youtube Link</div>
+								</a>
+							{:else}
+								<!-- <button
+									on:click={() => {
+										currentIndex = index;
+										playAudio(index);
+									}}
+									class="mt-1"
+								>
+									<svg
+										role="img"
+										class="h-5 w-5 fill-current text-gray-500"
+										viewBox="0 0 24 24"
+										xmlns="http://www.w3.org/2000/svg"
+										><title>YouTube</title><path
+											d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+										/></svg
+									>
+								</button> -->
+							{/if}
+						</div>
+						<div class="mr-2">
+							{#if heards[filteredData[index].Id]}
+								<button
+									class="rounded-md border border-blue-100 bg-blue-600 px-1 py-1 text-[10px] text-blue-100 shadow-lg shadow-blue-300"
+									on:click={() => toggleHeard(index)}>Heard</button
+								>
+							{:else}
+								<button
+									class="bg-red-blue rounded-md border border-blue-400 px-1 py-1 text-[10px] text-blue-400 shadow-lg"
+									on:click={() => toggleHeard(index)}>Heard</button
+								>
+							{/if}
+						</div>
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
 			</div>
 		</div>
 	</VirtualList>
@@ -616,47 +709,28 @@
 	<div
 		class="items-center space-y-2 rounded-t-xl border-y border-gray-300 bg-slate-50 p-2 pb-3 dark:border-slate-500 dark:bg-slate-800 sm:space-y-8 sm:p-10 sm:pb-8 lg:space-y-6 lg:p-6"
 	>
-		<div class="flex items-center space-x-4">
-			<div class="min-w-0 flex-auto space-y-1 font-semibold">
-				<p class="overflow-x-auto whitespace-nowrap text-lg text-slate-900">
-					<span>{currentTitle}</span>
-				</p>
-			</div>
-		</div>
-
 		<div class=" flex justify-end space-x-2">
 			<Button
 				on:click={exportHeardData}
 				variant="outline"
 				size="sm"
-				class="lil flex rounded-lg border px-2 pr-3 shadow-lg"
+				class="lil flex rounded-lg border px-1 py-1 pr-3 shadow-lg"
 			>
-				<ArrowUpFromLine class="h-4 w-4" />
-				<div class="ml-2">Export</div>
+				<ArrowUpFromLine class="h-3 w-3" />
+				<div class="ml-2 text-xs">Export</div>
 			</Button>
 			<Button
 				on:click={importHeardData}
 				variant="outline"
 				size="sm"
-				class="lil  flex rounded-lg border px-2 pr-3 shadow-lg"
+				class="lil  flex rounded-lg border px-1 pr-3 shadow-lg"
 			>
-				<ArrowDownFromLine class="h-4 w-4" />
-				<div class="ml-2">Import</div>
+				<ArrowDownFromLine class="h-3 w-3" />
+				<div class="ml-2 text-xs">Import</div>
 			</Button>
 		</div>
 
-		<div class="seekbar w-full">
-			<input
-				type="range"
-				class=" w-full text-purple-400"
-				min="0"
-				max={duration}
-				value={currentTime}
-				on:input={updateCurrentTime}
-			/>
-		</div>
-
-		<div class="flex justify-between text-sm font-medium tabular-nums leading-6">
+		<div class="flex items-center justify-between text-xs font-medium tabular-nums">
 			<div class="text-cyan-500 dark:text-slate-100">
 				{(() => {
 					const date = new Date(currentTime * 1000);
@@ -665,6 +739,13 @@
 					const seconds = String(date.getUTCSeconds()).padStart(2, '0');
 					return hours > 0 ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
 				})()}
+			</div>
+			<div class="flex items-center space-x-4">
+				<div class="min-w-0 flex-auto space-y-1 font-semibold">
+					<p class="overflow-x-auto whitespace-nowrap text-lg text-slate-900">
+						<span>{currentTitle}</span>
+					</p>
+				</div>
 			</div>
 			<div class="text-slate-500 dark:text-slate-400">
 				{(() => {
@@ -675,6 +756,16 @@
 					return hours > 0 ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
 				})()}
 			</div>
+		</div>
+		<div class="seekbar w-full">
+			<input
+				type="range"
+				class=" w-full text-purple-400"
+				min="0"
+				max={duration}
+				value={currentTime}
+				on:input={updateCurrentTime}
+			/>
 		</div>
 	</div>
 
@@ -737,7 +828,7 @@
 		</div>
 		<button
 			type="button"
-			class="-my-2 mx-auto flex h-20 w-20 flex-none items-center justify-center rounded-full bg-white text-slate-900 shadow-md ring-1 ring-slate-900/5 dark:bg-slate-100 dark:text-slate-700"
+			class="-my-2 mx-auto flex h-14 w-14 flex-none items-center justify-center rounded-full bg-white text-slate-900 shadow-md ring-1 ring-slate-900/5 dark:bg-slate-100 dark:text-slate-700"
 			aria-label="Pause"
 			on:click={togglePlayPause}
 		>
@@ -834,10 +925,6 @@
 		display: flex;
 		gap: 10px;
 		align-items: center;
-	}
-
-	.list {
-		margin-bottom: 20px;
 	}
 
 	:global(body),
