@@ -86,12 +86,35 @@
 		audio = new Audio();
 		audio.addEventListener('timeupdate', () => {
 			currentTime = audio.currentTime;
+			// Continuously save the current track's sortId and playback position to local storage
+			localStorage.setItem(
+				'lastPlayedTrack',
+				JSON.stringify({
+					sortId: filteredData[currentIndex].sortId,
+					position: currentTime
+				})
+			);
 		});
+
 		audio.addEventListener('loadedmetadata', () => {
 			duration = audio.duration;
 			isLoading = false;
 		});
 		audio.addEventListener('ended', nextAudio);
+
+		// Retrieve and load the last played track and its position based on sortId
+		const savedTrack = localStorage.getItem('lastPlayedTrack');
+		if (savedTrack) {
+			const { sortId, position } = JSON.parse(savedTrack);
+			const trackIndex = filteredData.findIndex((item: any) => item.sortId === sortId);
+			if (trackIndex !== -1) {
+				currentIndex = trackIndex;
+				lastPlayedPosition = position;
+				playAudio(currentIndex);
+				audio.currentTime = lastPlayedPosition;
+				pauseAudio();
+			}
+		}
 	});
 
 	$: searchTerm = '';
@@ -461,7 +484,7 @@
 			{style}
 			class="flex w-full items-center justify-between rounded-b-lg border-b-2 border-blue-50 bg-[#fbfbfb]"
 		>
-			<div class="ml-3">
+			<div class="ml-3 mr-2">
 				{#if downloadStates[filteredData[index].sortId]?.loading}
 					<div class="relative inline-block">
 						<div class="flex items-center space-x-2">
@@ -668,7 +691,7 @@
 								</button> -->
 							{/if}
 						</div>
-						<div class="mr-2">
+						<!-- <div class="mr-2">
 							{#if heards[filteredData[index].Id]}
 								<button
 									class="rounded-md border border-blue-100 bg-blue-600 px-1 py-1 text-[10px] text-blue-100 shadow-lg shadow-blue-300"
@@ -680,7 +703,7 @@
 									on:click={() => toggleHeard(index)}>Heard</button
 								>
 							{/if}
-						</div>
+						</div> -->
 					</DropdownMenu.Content>
 				</DropdownMenu.Root>
 			</div>
@@ -740,7 +763,7 @@
 					return hours > 0 ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
 				})()}
 			</div>
-			<div class="flex items-center space-x-4">
+			<div class="mx-2 flex w-fit items-center space-x-4 overflow-x-auto font-serif">
 				<div class="min-w-0 flex-auto space-y-1 font-semibold">
 					<p class="overflow-x-auto whitespace-nowrap text-lg text-slate-900">
 						<span>{currentTitle}</span>
